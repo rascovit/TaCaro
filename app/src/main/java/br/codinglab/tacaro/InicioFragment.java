@@ -312,10 +312,10 @@ public class InicioFragment extends Fragment {
 
             //BUNDLE RESPONSÁVEL POR ENVIAR AS LISTAS RESULTANTES DA PESQUISA DO PRODUTO AO FRAGMENT LISTA
             Bundle bundle = new Bundle();
-            bundle.putStringArrayList("nomes", listaNomes);
-            bundle.putStringArrayList("precos", listaPrecos);
-            bundle.putStringArrayList("imagens", listaImagens);
-            bundle.putStringArrayList("links", listaLinks);
+            bundle.putStringArrayList("listaNomes", listaNomes);
+            bundle.putStringArrayList("listaPrecos", listaPrecos);
+            bundle.putStringArrayList("listaImagens", listaImagens);
+            bundle.putStringArrayList("listaLinks", listaLinks);
 
             produtosFragment.setArguments(bundle);
 
