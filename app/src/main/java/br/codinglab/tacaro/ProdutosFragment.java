@@ -19,6 +19,10 @@ public class ProdutosFragment extends Fragment {
     private RecyclerView recyclerView;
     private RecyclerView.Adapter adapter;
     private RecyclerView.LayoutManager layoutManager;
+    private ArrayList<String> listaNomes;
+    private ArrayList<String> listaPrecos;
+    private ArrayList<String> listaImagens;
+    private ArrayList<String> listaLinks;
 
     public ProdutosFragment() {
         // Required empty public constructor
@@ -29,10 +33,10 @@ public class ProdutosFragment extends Fragment {
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_produtos, container, false);
 
-        ArrayList<String> listaNomes;
-        ArrayList<String> listaPrecos;
-        ArrayList<String> listaImagens;
-        ArrayList<String> listaLinks;
+        listaNomes = new ArrayList<>();
+        listaPrecos = new ArrayList<>();
+        listaImagens = new ArrayList<>();
+        listaLinks = new ArrayList<>();
 
         //RECYCLERVIEW PARA A LISTA DE PRODUTOS
         recyclerView = (RecyclerView) rootView.findViewById(R.id.recyclerView);
@@ -41,16 +45,15 @@ public class ProdutosFragment extends Fragment {
         recyclerView.setLayoutManager(layoutManager);
 
         //RECEBE O QUE FOI PASSADO VIA BUNDLE DO FRAGMENT ANTERIOR
-        listaNomes = getArguments().getStringArrayList("listaNomes");
-        listaPrecos = getArguments().getStringArrayList("listaPrecos");
-        listaImagens = getArguments().getStringArrayList("listaImagens");
-        listaLinks = getArguments().getStringArrayList("listaLinks");
+        listaNomes = getArguments().getStringArrayList("nomes");
+        listaPrecos = getArguments().getStringArrayList("precos");
+        listaImagens = getArguments().getStringArrayList("imagens");
+        listaLinks = getArguments().getStringArrayList("links");
 
         //CRIA NOVO ADAPTER DA RECYCLERVIEW PASSANDO AS LISTAS
-        adapter = new RecyclerViewAdapter(getActivity(), listaNomes, listaPrecos, listaImagens, listaLinks);
+        adapter = new RecyclerViewAdapter(getActivity(), listaNomes, listaPrecos, listaImagens);
         recyclerView.setAdapter(adapter);
 
         return rootView;
     }
-
 }
