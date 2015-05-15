@@ -14,8 +14,8 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 
 import java.util.ArrayList;
 
-/* CÓDIGO FONTE FORNECIDO PELA GOOGLE PARA IMPLEMENTAÇÃO DO RECYCLERVIEW ADAPTER */
-/* CONTÉM ALTERAÇÕES NO CONSTRUTOR (POSSUI O PARAMETRO CONTEXT A MAIS PARA CARREGAR AS FONTES DOS ASSETS */
+/* CÃ“DIGO FONTE FORNECIDO PELA GOOGLE PARA IMPLEMENTAÃ‡ÃƒO DO RECYCLERVIEW ADAPTER */
+/* CONTÃ‰M ALTERAÃ‡Ã•ES NO CONSTRUTOR (POSSUI O PARAMETRO CONTEXT A MAIS PARA CARREGAR AS FONTES DOS ASSETS */
 
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
 
@@ -65,13 +65,13 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         Typeface ralewayExtraLight = Typeface.createFromAsset(context.getAssets(), "Raleway-ExtraLight.ttf");
         Typeface ralewayLight = Typeface.createFromAsset(context.getAssets(), "Raleway-Light.ttf");
 
-        //SETA O TEXTO PARA O NOME DO PRODUTO E PREÇO
+        //SETA O TEXTO PARA O NOME DO PRODUTO E PREÃ‡O
         textViewNome.setText(nomes.get(position));
         textViewPreco.setText(precos.get(position));
         textViewNome.setTextColor(Color.parseColor("#FF434343"));
         textViewPreco.setTextColor(Color.parseColor("#FF212121"));
 
-        //CARREGA A IMAGEM DA POSIÇÃO 'POSITION' ATRAVÉS DA URL DA LISTA
+        //CARREGA A IMAGEM DA POSIÃ‡ÃƒO 'POSITION' ATRAVÃ‰S DA URL DA LISTA
         ImageLoader.getInstance().displayImage(linksImgs.get(position), imageView);
 
         textViewPreco.setTypeface(ralewayLight);

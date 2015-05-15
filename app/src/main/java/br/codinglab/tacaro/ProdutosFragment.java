@@ -19,10 +19,10 @@ public class ProdutosFragment extends Fragment {
     private RecyclerView recyclerView;
     private RecyclerView.Adapter adapter;
     private RecyclerView.LayoutManager layoutManager;
-    private ArrayList<String> listaNomes = new ArrayList<String>();
-    private ArrayList<String> listaPrecos = new ArrayList<String>();
-    private ArrayList<String> listaImagens = new ArrayList<String>();
-    private ArrayList<String> listaLinks = new ArrayList<String>();
+    private ArrayList<String> listaNomes;
+    private ArrayList<String> listaPrecos;
+    private ArrayList<String> listaImagens;
+    private ArrayList<String> listaLinks;
 
     public ProdutosFragment() {
         // Required empty public constructor
@@ -32,6 +32,11 @@ public class ProdutosFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_produtos, container, false);
+
+        listaNomes = new ArrayList<>();
+        listaPrecos = new ArrayList<>();
+        listaImagens = new ArrayList<>();
+        listaLinks = new ArrayList<>();
 
         //RECYCLERVIEW PARA A LISTA DE PRODUTOS
         recyclerView = (RecyclerView) rootView.findViewById(R.id.recyclerView);
@@ -51,6 +56,4 @@ public class ProdutosFragment extends Fragment {
 
         return rootView;
     }
-
-
 }

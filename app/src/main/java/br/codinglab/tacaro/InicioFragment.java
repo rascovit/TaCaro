@@ -49,17 +49,16 @@ public class InicioFragment extends Fragment {
     private String urlPesquisa;
     private TextView tituloApp;
     private AutoCompleteTextView autoCompleteNome;
-    private ArrayList<String> listaNomes = new ArrayList<String>();
-    private ArrayList<String> listaPrecos = new ArrayList<String>();
-    private ArrayList<String> listaLinks = new ArrayList<String>();
-    private ArrayList<String> listaProdutosSugeridos = new ArrayList<String>();
-    private ArrayList<String> listaImagens = new ArrayList<String>();
+    private ArrayList<String> listaNomes;
+    private ArrayList<String> listaPrecos;
+    private ArrayList<String> listaLinks;
+    private ArrayList<String> listaProdutosSugeridos;
+    private ArrayList<String> listaImagens;
     private String url = "http://sandbox.buscape.com.br/service/findProductList/4454485358486e4f31326f3d/BR/?format=json&keyword=";
 
     public InicioFragment() {
         // Required empty public constructor
     }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -69,6 +68,12 @@ public class InicioFragment extends Fragment {
         btnPesquisar = (Button) rootView.findViewById(R.id.btnPesquisar);
         autoCompleteNome = (AutoCompleteTextView) rootView.findViewById(R.id.editTextNomeProduto);
         tituloApp = (TextView) rootView.findViewById(R.id.textViewTitulo);
+
+        listaNomes = new ArrayList<>();
+        listaPrecos = new ArrayList<>();
+        listaLinks = new ArrayList<>();
+        listaProdutosSugeridos = new ArrayList<>();
+        listaImagens = new ArrayList<>();
 
         //CONFIGURAÇÕES DO UNIVERSAL IMAGE LOADER (IMAGE CACHE E ASYNC REMOTE LOAD)
         DisplayImageOptions defaultOptions = new DisplayImageOptions.Builder()
@@ -86,7 +91,7 @@ public class InicioFragment extends Fragment {
         autoCompleteNome.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if (autoCompleteNome.getText().toString().equals(null) || autoCompleteNome.getText().toString().equals("")) {
+                if (autoCompleteNome.getText().toString().equals("")) {
                     Toast.makeText(getActivity(), "Digite o nome do produto a ser pesquisado", Toast.LENGTH_SHORT).show();
                 } else {
                     if (estaConectadoInternet()) {
@@ -118,7 +123,7 @@ public class InicioFragment extends Fragment {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
                 if (keyCode == KeyEvent.KEYCODE_ENTER) {
-                    if (autoCompleteNome.getText().toString().equals(null) || autoCompleteNome.getText().toString().equals("")) {
+                    if (autoCompleteNome.getText().toString().equals("")) {
                         Toast.makeText(getActivity(), "Digite o nome do produto a ser pesquisado", Toast.LENGTH_SHORT).show();
                     } else {
                         if (estaConectadoInternet()) {
@@ -179,7 +184,7 @@ public class InicioFragment extends Fragment {
         btnPesquisar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (autoCompleteNome.getText().toString().equals(null) || autoCompleteNome.getText().toString().equals("")) {
+                if (autoCompleteNome.getText().toString().equals("")) {
                     Toast.makeText(getActivity(), "Digite o nome do produto a ser pesquisado", Toast.LENGTH_SHORT).show();
                 } else {
                     if (estaConectadoInternet()) {
@@ -253,18 +258,19 @@ public class InicioFragment extends Fragment {
                     JSONObject jsonObj = new JSONObject(jsonStr);
                     JSONArray jsonArray = jsonObj.getJSONArray("product");
                     for (int i = 0; i < jsonArray.length(); i++) {
-                        //SE O NOME CURTO DO PRODUTO ESTÁ PRESENTE NO JSON
-                        if (jsonArray.getJSONObject(i).getJSONObject("product").isNull("productshortname")) {
-                            listaNomes.add(jsonArray.getJSONObject(i).getJSONObject("product").optString("productname"));
+                        JSONObject produtoAtual = jsonArray.getJSONObject(i).getJSONObject("product");
+                        //SE O NOME CURTO DO PRODUTO NÃO ESTÁ PRESENTE NO JSON
+                        if (produtoAtual.isNull("productshortname")) {
+                            listaNomes.add(produtoAtual.optString("productname"));
                         }
                         else {
-                            listaNomes.add(jsonArray.getJSONObject(i).getJSONObject("product").optString("productshortname"));
+                            listaNomes.add(produtoAtual.optString("productshortname"));
                         }
 
-                        String precoProduto = jsonArray.getJSONObject(i).getJSONObject("product").optString("pricemin");
+                        String precoProduto = produtoAtual.optString("pricemin");
 
                         //SE O PREÇO MÍNIMO DO PRODUTO ESTÁ PRESENTE NO JSON
-                        if (jsonArray.getJSONObject(i).getJSONObject("product").isNull("pricemin")) {
+                        if (produtoAtual.isNull("pricemin")) {
                             listaPrecos.add("Produto não disponível");
                         }
                         else {
@@ -272,20 +278,21 @@ public class InicioFragment extends Fragment {
                         }
 
                         //SE O PRODUTO NÃO POSSUI FOTO
-                        if (jsonArray.getJSONObject(i).getJSONObject("product").isNull("thumbnail")) {
+                        if (produtoAtual.isNull("thumbnail")) {
                             listaImagens.add("assets://SemImagem.png");
                         }
                         else {
-                            //
-                            if (!jsonArray.getJSONObject(i).getJSONObject("product").getJSONObject("thumbnail").getJSONArray("formats").isNull(1)) {
-                                listaImagens.add(jsonArray.getJSONObject(i).getJSONObject("product").getJSONObject("thumbnail").getJSONArray("formats").getJSONObject(1).getJSONObject("formats").optString("url"));
+                            //VERIFICA SE O PRODUTO POSSUI IMAGEM PARA SER EXIBIDA
+                            if (!produtoAtual.getJSONObject("thumbnail").getJSONArray("formats").isNull(1)) {
+                                //FAZ O PARSE DA URL DA IMAGEM DE 300X300 FORNECIDA PELO BUSCAPE (POSIÇÃO '1' DO ARRAY 'FORMATS'
+                                listaImagens.add(produtoAtual.getJSONObject("thumbnail").getJSONArray("formats").getJSONObject(1).getJSONObject("formats").optString("url"));
                             }
                             else {
                                 listaImagens.add("assets://SemImagem.png");
                             }
                         }
-                        //ADICIONA A URL PARA ACESSO DO PRODUTO NO SITE DO BUSCAPÉ
-                        listaLinks.add(jsonArray.getJSONObject(i).getJSONObject("product").getJSONArray("links").getJSONObject(0).getJSONObject("link").optString("url").toString());
+                        //ADICIONA A URL PARA ACESSO DO PRODUTO NO SITE DO BUSCAPÉ (POSIÇÃO '0' DO ARRAY LINKS
+                        listaLinks.add(produtoAtual.getJSONArray("links").getJSONObject(0).getJSONObject("link").optString("url"));
                     }
                 } catch (JSONException e) {
                     Log.e("AsyncTaskPesquisa", "Não foi possível recuperar os dados do JSON");
@@ -349,7 +356,7 @@ public class InicioFragment extends Fragment {
         @Override
         protected void onPostExecute(String s) {
             //CRIA UM ADAPTER SIMPLES PASSANDO O RESULTADO DO AUTO-COMPLETE DA API BUSCAPÉ
-            ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_dropdown_item_1line, listaProdutosSugeridos);
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_dropdown_item_1line, listaProdutosSugeridos);
             autoCompleteNome.setAdapter(adapter);
         }
     }
