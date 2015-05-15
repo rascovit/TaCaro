@@ -49,11 +49,11 @@ public class InicioFragment extends Fragment {
     private String urlPesquisa;
     private TextView tituloApp;
     private AutoCompleteTextView autoCompleteNome;
-    private ArrayList<String> listaNomes = new ArrayList<String>();
-    private ArrayList<String> listaPrecos = new ArrayList<String>();
-    private ArrayList<String> listaLinks = new ArrayList<String>();
-    private ArrayList<String> listaProdutosSugeridos = new ArrayList<String>();
-    private ArrayList<String> listaImagens = new ArrayList<String>();
+    private ArrayList<String> listaNomes;
+    private ArrayList<String> listaPrecos;
+    private ArrayList<String> listaLinks;
+    private ArrayList<String> listaProdutosSugeridos;
+    private ArrayList<String> listaImagens;
     private String url = "http://sandbox.buscape.com.br/service/findProductList/4454485358486e4f31326f3d/BR/?format=json&keyword=";
 
     public InicioFragment() {
@@ -69,6 +69,12 @@ public class InicioFragment extends Fragment {
         btnPesquisar = (Button) rootView.findViewById(R.id.btnPesquisar);
         autoCompleteNome = (AutoCompleteTextView) rootView.findViewById(R.id.editTextNomeProduto);
         tituloApp = (TextView) rootView.findViewById(R.id.textViewTitulo);
+
+        listaNomes = new ArrayList<>();
+        listaPrecos = new ArrayList<>();
+        listaLinks = new ArrayList<>();
+        listaProdutosSugeridos = new ArrayList<>();
+        listaImagens = new ArrayList<>();
 
         //CONFIGURAÇÕES DO UNIVERSAL IMAGE LOADER (IMAGE CACHE E ASYNC REMOTE LOAD)
         DisplayImageOptions defaultOptions = new DisplayImageOptions.Builder()
@@ -86,7 +92,7 @@ public class InicioFragment extends Fragment {
         autoCompleteNome.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                if (autoCompleteNome.getText().toString().equals(null) || autoCompleteNome.getText().toString().equals("")) {
+                if (autoCompleteNome.getText().toString().equals("")) {
                     Toast.makeText(getActivity(), "Digite o nome do produto a ser pesquisado", Toast.LENGTH_SHORT).show();
                 } else {
                     if (estaConectadoInternet()) {
@@ -117,33 +123,35 @@ public class InicioFragment extends Fragment {
         autoCompleteNome.setOnKeyListener(new View.OnKeyListener() {
             @Override
             public boolean onKey(View v, int keyCode, KeyEvent event) {
-                if (keyCode == KeyEvent.KEYCODE_ENTER) {
-                    if (autoCompleteNome.getText().toString().equals(null) || autoCompleteNome.getText().toString().equals("")) {
-                        Toast.makeText(getActivity(), "Digite o nome do produto a ser pesquisado", Toast.LENGTH_SHORT).show();
-                    } else {
-                        if (estaConectadoInternet()) {
-                            if (!listaNomes.isEmpty()) {
-                                listaNomes.clear();
-                                listaLinks.clear();
-                                listaPrecos.clear();
-                                listaImagens.clear();
-                            }
-                            urlPesquisa = "http://sandbox.buscape.com.br/service/findProductList/4454485358486e4f31326f3d/BR/?format=json&keyword=";
-                            String nomeProduto = autoCompleteNome.getText().toString().replace(" ", "+");
-                            urlPesquisa += nomeProduto;
-                            new AsyncTaskPesquisa().execute();
-                            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(
-                                    Context.INPUT_METHOD_SERVICE);
-                            imm.hideSoftInputFromWindow(autoCompleteNome.getWindowToken(), 0);
-                        } else {
-                            Intent intent = new Intent(Settings.ACTION_SETTINGS);
-                            startActivity(intent);
-                            Toast.makeText(getActivity(), "Você não está conectado à Internet", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                    return true;
+                if (event.getAction() != KeyEvent.ACTION_DOWN) {
+                    return false;
                 }
-                return false;
+                if (autoCompleteNome.getText().toString().equals("")) {
+                    Toast.makeText(getActivity(), "Digite o nome do produto a ser pesquisado", Toast.LENGTH_SHORT).show();
+                } else {
+                    if (estaConectadoInternet()) {
+                        if (!listaNomes.isEmpty()) {
+                            listaNomes.clear();
+                            listaLinks.clear();
+                            listaPrecos.clear();
+                            listaImagens.clear();
+                        }
+                        urlPesquisa = "http://sandbox.buscape.com.br/service/findProductList/4454485358486e4f31326f3d/BR/?format=json&keyword=";
+                        String nomeProduto = autoCompleteNome.getText().toString().replace(" ", "+");
+                        urlPesquisa += nomeProduto;
+                        new AsyncTaskPesquisa().execute();
+
+                        //PARA ESCONDER O TECLADO VIRTUAL QUANDO APERTAR O BOTÃO PARA PESQUISAR
+                        InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(
+                                Context.INPUT_METHOD_SERVICE);
+                        imm.hideSoftInputFromWindow(autoCompleteNome.getWindowToken(), 0);
+                    } else {
+                        Intent intent = new Intent(Settings.ACTION_SETTINGS);
+                        startActivity(intent);
+                        Toast.makeText(getActivity(), "Você não está conectado à Internet", Toast.LENGTH_SHORT).show();
+                    }
+                }
+                return true;
             }
         });
 
@@ -179,7 +187,7 @@ public class InicioFragment extends Fragment {
         btnPesquisar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (autoCompleteNome.getText().toString().equals(null) || autoCompleteNome.getText().toString().equals("")) {
+                if (autoCompleteNome.getText().toString().equals("")) {
                     Toast.makeText(getActivity(), "Digite o nome do produto a ser pesquisado", Toast.LENGTH_SHORT).show();
                 } else {
                     if (estaConectadoInternet()) {
@@ -253,18 +261,19 @@ public class InicioFragment extends Fragment {
                     JSONObject jsonObj = new JSONObject(jsonStr);
                     JSONArray jsonArray = jsonObj.getJSONArray("product");
                     for (int i = 0; i < jsonArray.length(); i++) {
+                        JSONObject jsonProduto = jsonArray.getJSONObject(i).getJSONObject("product");
                         //SE O NOME CURTO DO PRODUTO ESTÁ PRESENTE NO JSON
-                        if (jsonArray.getJSONObject(i).getJSONObject("product").isNull("productshortname")) {
-                            listaNomes.add(jsonArray.getJSONObject(i).getJSONObject("product").optString("productname"));
+                        if (jsonProduto.isNull("productshortname")) {
+                            listaNomes.add(jsonProduto.optString("productname"));
                         }
                         else {
-                            listaNomes.add(jsonArray.getJSONObject(i).getJSONObject("product").optString("productshortname"));
+                            listaNomes.add(jsonProduto.optString("productshortname"));
                         }
 
-                        String precoProduto = jsonArray.getJSONObject(i).getJSONObject("product").optString("pricemin");
+                        String precoProduto = jsonProduto.optString("pricemin");
 
                         //SE O PREÇO MÍNIMO DO PRODUTO ESTÁ PRESENTE NO JSON
-                        if (jsonArray.getJSONObject(i).getJSONObject("product").isNull("pricemin")) {
+                        if (jsonProduto.isNull("pricemin")) {
                             listaPrecos.add("Produto não disponível");
                         }
                         else {
@@ -272,20 +281,20 @@ public class InicioFragment extends Fragment {
                         }
 
                         //SE O PRODUTO NÃO POSSUI FOTO
-                        if (jsonArray.getJSONObject(i).getJSONObject("product").isNull("thumbnail")) {
+                        if (jsonProduto.isNull("thumbnail")) {
                             listaImagens.add("assets://SemImagem.png");
                         }
                         else {
-                            //
-                            if (!jsonArray.getJSONObject(i).getJSONObject("product").getJSONObject("thumbnail").getJSONArray("formats").isNull(1)) {
-                                listaImagens.add(jsonArray.getJSONObject(i).getJSONObject("product").getJSONObject("thumbnail").getJSONArray("formats").getJSONObject(1).getJSONObject("formats").optString("url"));
+                            //SE A FOTO NA RESOLUÇÃO 300X300 ESTÁ DISPONÍVEL
+                            if (!jsonProduto.getJSONObject("thumbnail").getJSONArray("formats").isNull(1)) {
+                                listaImagens.add(jsonProduto.getJSONObject("thumbnail").getJSONArray("formats").getJSONObject(1).getJSONObject("formats").optString("url"));
                             }
                             else {
                                 listaImagens.add("assets://SemImagem.png");
                             }
                         }
                         //ADICIONA A URL PARA ACESSO DO PRODUTO NO SITE DO BUSCAPÉ
-                        listaLinks.add(jsonArray.getJSONObject(i).getJSONObject("product").getJSONArray("links").getJSONObject(0).getJSONObject("link").optString("url").toString());
+                        listaLinks.add(jsonProduto.getJSONArray("links").getJSONObject(0).getJSONObject("link").optString("url"));
                     }
                 } catch (JSONException e) {
                     Log.e("AsyncTaskPesquisa", "Não foi possível recuperar os dados do JSON");
@@ -349,7 +358,7 @@ public class InicioFragment extends Fragment {
         @Override
         protected void onPostExecute(String s) {
             //CRIA UM ADAPTER SIMPLES PASSANDO O RESULTADO DO AUTO-COMPLETE DA API BUSCAPÉ
-            ArrayAdapter<String> adapter = new ArrayAdapter<String>(getActivity(), android.R.layout.simple_dropdown_item_1line, listaProdutosSugeridos);
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_dropdown_item_1line, listaProdutosSugeridos);
             autoCompleteNome.setAdapter(adapter);
         }
     }
