@@ -126,29 +126,35 @@ public class InicioFragment extends Fragment {
                 if (event.getAction() != KeyEvent.ACTION_DOWN) {
                     return false;
                 }
-                if (autoCompleteNome.getText().toString().equals("")) {
-                    Toast.makeText(getActivity(), "Digite o nome do produto a ser pesquisado", Toast.LENGTH_SHORT).show();
-                } else {
-                    if (estaConectadoInternet()) {
-                        if (!listaNomes.isEmpty()) {
-                            listaNomes.clear();
-                            listaLinks.clear();
-                            listaPrecos.clear();
-                            listaImagens.clear();
-                        }
-                        urlPesquisa = "http://sandbox.buscape.com.br/service/findProductList/4454485358486e4f31326f3d/BR/?format=json&keyword=";
-                        String nomeProduto = autoCompleteNome.getText().toString().replace(" ", "+");
-                        urlPesquisa += nomeProduto;
-                        new AsyncTaskPesquisa().execute();
-
-                        //PARA ESCONDER O TECLADO VIRTUAL QUANDO APERTAR O BOTÃO PARA PESQUISAR
-                        InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(
-                                Context.INPUT_METHOD_SERVICE);
-                        imm.hideSoftInputFromWindow(autoCompleteNome.getWindowToken(), 0);
+                if (event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
+                    return false;
+                }
+                //VERIFICA SE O USUÁRIO ESTÁ DELETANDO O TEXTO DIGITADO
+                if (event.getKeyCode() != KeyEvent.KEYCODE_DEL) {
+                    if (autoCompleteNome.getText().toString().equals("")) {
+                        Toast.makeText(getActivity(), "Digite o nome do produto a ser pesquisado", Toast.LENGTH_SHORT).show();
                     } else {
-                        Intent intent = new Intent(Settings.ACTION_SETTINGS);
-                        startActivity(intent);
-                        Toast.makeText(getActivity(), "Você não está conectado à Internet", Toast.LENGTH_SHORT).show();
+                        if (estaConectadoInternet()) {
+                            if (!listaNomes.isEmpty()) {
+                                listaNomes.clear();
+                                listaLinks.clear();
+                                listaPrecos.clear();
+                                listaImagens.clear();
+                            }
+                            urlPesquisa = "http://sandbox.buscape.com.br/service/findProductList/4454485358486e4f31326f3d/BR/?format=json&keyword=";
+                            String nomeProduto = autoCompleteNome.getText().toString().replace(" ", "+");
+                            urlPesquisa += nomeProduto;
+                            new AsyncTaskPesquisa().execute();
+
+                            //PARA ESCONDER O TECLADO VIRTUAL QUANDO APERTAR O BOTÃO PARA PESQUISAR
+                            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(
+                                    Context.INPUT_METHOD_SERVICE);
+                            imm.hideSoftInputFromWindow(autoCompleteNome.getWindowToken(), 0);
+                        } else {
+                            Intent intent = new Intent(Settings.ACTION_SETTINGS);
+                            startActivity(intent);
+                            Toast.makeText(getActivity(), "Você não está conectado à Internet", Toast.LENGTH_SHORT).show();
+                        }
                     }
                 }
                 return true;
@@ -166,14 +172,16 @@ public class InicioFragment extends Fragment {
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if (s.toString().contains(" ")) {
-                    s = s.toString().replace(" ", "+");
-                }
-                url = urlOriginal.concat(s.toString());
-                if (estaConectadoInternet()) {
-                    new AsyncTaskPesquisaTemporaria().execute();
-                } else {
-                    Toast.makeText(getActivity(), "Você não está conectado à Internet", Toast.LENGTH_SHORT).show();
+                if (!autoCompleteNome.getText().equals("")) {
+                    if (s.toString().contains(" ")) {
+                        s = s.toString().replace(" ", "+");
+                    }
+                    url = urlOriginal.concat(s.toString());
+                    if (estaConectadoInternet()) {
+                        new AsyncTaskPesquisaTemporaria().execute();
+                    } else {
+                        Toast.makeText(getActivity(), "Você não está conectado à Internet", Toast.LENGTH_SHORT).show();
+                    }
                 }
             }
 
@@ -270,14 +278,12 @@ public class InicioFragment extends Fragment {
                             listaNomes.add(jsonProduto.optString("productshortname"));
                         }
 
-                        String precoProduto = jsonProduto.optString("pricemin");
-
                         //SE O PREÇO MÍNIMO DO PRODUTO ESTÁ PRESENTE NO JSON
                         if (jsonProduto.isNull("pricemin")) {
                             listaPrecos.add("Produto não disponível");
                         }
                         else {
-                            listaPrecos.add("R$" + precoProduto);
+                            listaPrecos.add("R$" + jsonProduto.optString("pricemin"));
                         }
 
                         //SE O PRODUTO NÃO POSSUI FOTO
@@ -293,8 +299,15 @@ public class InicioFragment extends Fragment {
                                 listaImagens.add("assets://SemImagem.png");
                             }
                         }
+
                         //ADICIONA A URL PARA ACESSO DO PRODUTO NO SITE DO BUSCAPÉ
-                        listaLinks.add(jsonProduto.getJSONArray("links").getJSONObject(0).getJSONObject("link").optString("url"));
+                        String linkOfertasProduto = jsonProduto.getJSONArray("links").getJSONObject(1).getJSONObject("link").optString("url");
+
+                        //ADICIONA O FORMAT=JSON AO LINK DE OFERTA DO PRODUTO
+                        linkOfertasProduto = linkOfertasProduto.substring(0, linkOfertasProduto.indexOf("?productId")) + "?format=json&" + linkOfertasProduto.substring(linkOfertasProduto.indexOf("?productId")+1, linkOfertasProduto.length());
+                        listaLinks.add(linkOfertasProduto);
+
+                        //listaLinks.add(jsonProduto.getJSONArray("links").getJSONObject(0).getJSONObject("link").optString("url"));
                     }
                 } catch (JSONException e) {
                     Log.e("AsyncTaskPesquisa", "Não foi possível recuperar os dados do JSON");

@@ -96,7 +96,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 bundle.putString("precoProduto", precos.get(position));
                 bundle.putString("imagemProduto", linksImgs.get(position));
                 bundle.putString("linkProduto", linksProduto.get(position));
-
                 detalhesProdutoFragment.setArguments(bundle);
 
                 //TROCA O FRAGMENT DA ACTIVITY PARA O FRAGMENT 'DETALHES DO PRODUTO'
