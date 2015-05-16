@@ -31,10 +31,12 @@ public class DetalhesProdutoFragment extends Fragment {
     private ArrayList<String> linksImagensLoja;
     private ArrayList<String> nomesLojas;
     private ArrayList<String> precosLojas;
+    private ArrayList<String> linksImagensProdutos;
     private RecyclerView recyclerView;
     private RecyclerView.Adapter adapter;
     private RecyclerView.LayoutManager layoutManager;
     private RatingBar avaliacaoProduto;
+    private TextView textViewNumAvaliacoes;
 
     public DetalhesProdutoFragment() {
         // Required empty public constructor
@@ -54,11 +56,13 @@ public class DetalhesProdutoFragment extends Fragment {
 
         TextView textViewNomeProduto = (TextView) rootView.findViewById(R.id.textViewNomeProduto);
         TextView textViewPrecoProduto = (TextView) rootView.findViewById(R.id.textViewPrecoProduto);
+        textViewNumAvaliacoes = (TextView) rootView.findViewById(R.id.textViewNumAvaliacoes);
         avaliacaoProduto = (RatingBar) rootView.findViewById(R.id.avaliacaoProduto);
 
         linksImagensLoja = new ArrayList<>();
         nomesLojas = new ArrayList<>();
         precosLojas = new ArrayList<>();
+        linksImagensProdutos = new ArrayList<>();
 
         String nomeProduto = getArguments().getString("nomeProduto");
         String precoProduto = getArguments().getString("precoProduto");
@@ -82,6 +86,7 @@ public class DetalhesProdutoFragment extends Fragment {
 
         textViewNomeProduto.setTypeface(ralewayExtraLight);
         textViewPrecoProduto.setTypeface(ralewayLight);
+        textViewNumAvaliacoes.setTypeface(ralewayLight);
 
         new AsyncTaskPesquisaOfertas().execute(linkProduto);
 
@@ -113,6 +118,16 @@ public class DetalhesProdutoFragment extends Fragment {
                 try {
                     JSONObject jsonObj = new JSONObject(jsonStr);
                     JSONArray jsonProduto = jsonObj.getJSONArray("product");
+
+                    final String numeroAvaliacoes = jsonProduto.getJSONObject(0).getJSONObject("product").getJSONObject("rating").getJSONObject("useraveragerating").optString("numcomments");
+                    getActivity().runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            textViewNumAvaliacoes.setText(numeroAvaliacoes + " avaliações");
+                        }
+                    });
+
+                    //PARSE DA NOTA DO PRODUTO (REFATORAR DEPOIS)
                     String notaProduto = jsonProduto.getJSONObject(0).getJSONObject("product").getJSONObject("rating").getJSONObject("useraveragerating").optString("rating");
                     avaliacaoProduto.setRating(Math.round(Float.parseFloat(notaProduto) / 2));
 
@@ -120,6 +135,14 @@ public class DetalhesProdutoFragment extends Fragment {
                     for (int i = 0; i < jsonArray.length(); i++) {
                         JSONObject jsonOferta = jsonArray.getJSONObject(i).getJSONObject("offer");
                         JSONObject jsonLoja = jsonOferta.getJSONObject("seller");
+
+                        if (!jsonOferta.isNull("thumbnail")) {
+                            linksImagensProdutos.add(jsonOferta.getJSONObject("thumbnail").optString("url"));
+                        }
+                        else {
+                            linksImagensProdutos.add("assets://SemImagem.png");
+                        }
+
                         if (!jsonLoja.isNull("thumbnail")) {
                             linksImagensLoja.add(jsonLoja.getJSONObject("thumbnail").optString("url"));
                         }
@@ -142,7 +165,7 @@ public class DetalhesProdutoFragment extends Fragment {
         @Override
         protected void onPostExecute(String s) {
             progressDialog.dismiss();
-            adapter = new RecyclerViewAdapterOfertas(getActivity(), precosLojas, linksImagensLoja, nomesLojas);
+            adapter = new RecyclerViewAdapterOfertas(getActivity(), precosLojas, linksImagensLoja, nomesLojas, linksImagensProdutos);
             recyclerView.setAdapter(adapter);
         }
     }

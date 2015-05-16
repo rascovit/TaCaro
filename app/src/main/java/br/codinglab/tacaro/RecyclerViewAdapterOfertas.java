@@ -17,8 +17,9 @@ import java.util.ArrayList;
 public class RecyclerViewAdapterOfertas extends RecyclerView.Adapter<RecyclerViewAdapterOfertas.ViewHolder> {
 
     private ArrayList<String> precos;
-    private ArrayList<String> linksImgs;
+    private ArrayList<String> linksImgsLojas;
     private ArrayList<String> nomesLojas;
+    private ArrayList<String> linksImgsProdutos;
     private Context context;
 
     // Provide a reference to the views for each data item
@@ -34,11 +35,12 @@ public class RecyclerViewAdapterOfertas extends RecyclerView.Adapter<RecyclerVie
     }
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public RecyclerViewAdapterOfertas(Context context, ArrayList<String> precos, ArrayList<String> linksImgs, ArrayList<String> nomesLojas) {
+    public RecyclerViewAdapterOfertas(Context context, ArrayList<String> precos, ArrayList<String> linksImgsLojas, ArrayList<String> nomesLojas, ArrayList<String> linksImgsProdutos) {
         this.context = context;
         this.precos = precos;
-        this.linksImgs = linksImgs;
+        this.linksImgsLojas = linksImgsLojas;
         this.nomesLojas = nomesLojas;
+        this.linksImgsProdutos = linksImgsProdutos;
     }
 
     // Create new views (invoked by the layout manager)
@@ -57,16 +59,20 @@ public class RecyclerViewAdapterOfertas extends RecyclerView.Adapter<RecyclerVie
     public void onBindViewHolder(ViewHolder holder, final int position) {
         TextView textViewPreco = (TextView) holder.view.findViewById(R.id.precoLoja);
         TextView textViewNome = (TextView) holder.view.findViewById(R.id.nomeLoja);
-        ImageView imageView = (ImageView) holder.view.findViewById(R.id.imagemLoja);
+        ImageView imageViewLoja = (ImageView) holder.view.findViewById(R.id.imagemLoja);
+        ImageView imageViewProduto = (ImageView) holder.view.findViewById(R.id.imagemProduto);
 
-        if (nomesLojas.get(position).equals("assets://SemImagem.png")) {
+        //VERIFICA SE NÃO TEM IMAGEM. CASO NÃO TENHA, ENTÃO MOSTRE O TEXTVIEW COM O NOME DA LOJA
+        if (linksImgsLojas.get(position).equals("assets://SemImagem.png")) {
             textViewNome.setText(nomesLojas.get(position));
             textViewNome.setVisibility(View.VISIBLE);
-            ImageLoader.getInstance().displayImage(linksImgs.get(position), imageView);
+            ImageLoader.getInstance().displayImage("", imageViewLoja);
         }
         else {
-            ImageLoader.getInstance().displayImage(linksImgs.get(position), imageView);
+            ImageLoader.getInstance().displayImage(linksImgsLojas.get(position), imageViewLoja);
         }
+
+        ImageLoader.getInstance().displayImage(linksImgsProdutos.get(position), imageViewProduto);
 
         //SETA O TEXTO PARA O NOME DO PRODUTO E PREÇO
         textViewNome.setText(nomesLojas.get(position));

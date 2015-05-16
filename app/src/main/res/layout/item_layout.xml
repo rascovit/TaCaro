@@ -28,7 +28,7 @@
                 android:id="@+id/nome"
                 android:layout_toRightOf="@+id/imagemProduto"
                 android:layout_alignParentTop="true"
-                android:textSize="23sp"
+                android:textSize="18sp"
                 />
 
             <TextView
@@ -37,7 +37,7 @@
                 android:id="@+id/preco"
                 android:layout_toRightOf="@+id/imagemProduto"
                 android:layout_below="@+id/nome"
-                android:textSize="21sp" />
+                android:textSize="19sp" />
 
         </RelativeLayout>
 
