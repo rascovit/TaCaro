@@ -13,6 +13,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.RatingBar;
 import android.widget.TextView;
 
 import org.json.JSONArray;
@@ -33,6 +34,7 @@ public class DetalhesProdutoFragment extends Fragment {
     private RecyclerView recyclerView;
     private RecyclerView.Adapter adapter;
     private RecyclerView.LayoutManager layoutManager;
+    private RatingBar avaliacaoProduto;
 
     public DetalhesProdutoFragment() {
         // Required empty public constructor
@@ -52,6 +54,7 @@ public class DetalhesProdutoFragment extends Fragment {
 
         TextView textViewNomeProduto = (TextView) rootView.findViewById(R.id.textViewNomeProduto);
         TextView textViewPrecoProduto = (TextView) rootView.findViewById(R.id.textViewPrecoProduto);
+        avaliacaoProduto = (RatingBar) rootView.findViewById(R.id.avaliacaoProduto);
 
         linksImagensLoja = new ArrayList<>();
         nomesLojas = new ArrayList<>();
@@ -60,7 +63,6 @@ public class DetalhesProdutoFragment extends Fragment {
         String nomeProduto = getArguments().getString("nomeProduto");
         String precoProduto = getArguments().getString("precoProduto");
         String linkProduto = getArguments().getString("linkProduto");
-
         //ImageLoader.getInstance().displayImage(imagemProduto, imageViewProduto);
         textViewNomeProduto.setText(nomeProduto);
 
@@ -69,7 +71,7 @@ public class DetalhesProdutoFragment extends Fragment {
             textViewPrecoProduto.setText(precoProduto);
         }
         else {
-            textViewPrecoProduto.setText("A partir de " + precoProduto);
+            textViewPrecoProduto.setText("O mais barato custa " + precoProduto);
         }
 
         textViewNomeProduto.setTextColor(Color.parseColor("#FF434343"));
@@ -110,6 +112,10 @@ public class DetalhesProdutoFragment extends Fragment {
                 }
                 try {
                     JSONObject jsonObj = new JSONObject(jsonStr);
+                    JSONArray jsonProduto = jsonObj.getJSONArray("product");
+                    String notaProduto = jsonProduto.getJSONObject(0).getJSONObject("product").getJSONObject("rating").getJSONObject("useraveragerating").optString("rating");
+                    avaliacaoProduto.setRating(Math.round(Float.parseFloat(notaProduto) / 2));
+
                     JSONArray jsonArray = jsonObj.getJSONArray("offer");
                     for (int i = 0; i < jsonArray.length(); i++) {
                         JSONObject jsonOferta = jsonArray.getJSONObject(i).getJSONObject("offer");
