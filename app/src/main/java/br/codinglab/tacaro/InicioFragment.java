@@ -25,7 +25,7 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.TextView;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.nostra13.universalimageloader.cache.memory.impl.LruMemoryCache;
@@ -47,8 +47,8 @@ public class InicioFragment extends Fragment {
 
     private Button btnPesquisar;
     private String urlPesquisa;
-    private TextView tituloApp;
     private AutoCompleteTextView autoCompleteNome;
+    private ImageView imageViewLogo;
     private ArrayList<String> listaNomes;
     private ArrayList<String> listaPrecos;
     private ArrayList<String> listaLinks;
@@ -68,7 +68,7 @@ public class InicioFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_inicio, container, false);
         btnPesquisar = (Button) rootView.findViewById(R.id.btnPesquisar);
         autoCompleteNome = (AutoCompleteTextView) rootView.findViewById(R.id.editTextNomeProduto);
-        tituloApp = (TextView) rootView.findViewById(R.id.textViewTitulo);
+        imageViewLogo = (ImageView) rootView.findViewById(R.id.imageViewLogo);
 
         listaNomes = new ArrayList<>();
         listaPrecos = new ArrayList<>();
@@ -226,7 +226,6 @@ public class InicioFragment extends Fragment {
         Typeface ralewayLight = Typeface.createFromAsset(getActivity().getAssets(), "Raleway-Light.ttf");
         btnPesquisar.setTypeface(ralewayLight);
         autoCompleteNome.setTypeface(ralewayExtraLight);
-        tituloApp.setTypeface(ralewayLight);
 
         return rootView;
     }
@@ -267,47 +266,53 @@ public class InicioFragment extends Fragment {
             if (jsonStr != null) {
                 try {
                     JSONObject jsonObj = new JSONObject(jsonStr);
-                    JSONArray jsonArray = jsonObj.getJSONArray("product");
-                    for (int i = 0; i < jsonArray.length(); i++) {
-                        JSONObject jsonProduto = jsonArray.getJSONObject(i).getJSONObject("product");
-                        //SE O NOME CURTO DO PRODUTO ESTÁ PRESENTE NO JSON
-                        if (jsonProduto.isNull("productshortname")) {
-                            listaNomes.add(jsonProduto.optString("productname"));
-                        }
-                        else {
-                            listaNomes.add(jsonProduto.optString("productshortname"));
-                        }
-
-                        //SE O PREÇO MÍNIMO DO PRODUTO ESTÁ PRESENTE NO JSON
-                        if (jsonProduto.isNull("pricemin")) {
-                            listaPrecos.add("Produto não disponível");
-                        }
-                        else {
-                            listaPrecos.add("R$" + jsonProduto.optString("pricemin"));
-                        }
-
-                        //SE O PRODUTO NÃO POSSUI FOTO
-                        if (jsonProduto.isNull("thumbnail")) {
-                            listaImagens.add("assets://SemImagem.png");
-                        }
-                        else {
-                            //SE A FOTO NA RESOLUÇÃO 300X300 ESTÁ DISPONÍVEL
-                            if (!jsonProduto.getJSONObject("thumbnail").getJSONArray("formats").isNull(1)) {
-                                listaImagens.add(jsonProduto.getJSONObject("thumbnail").getJSONArray("formats").getJSONObject(1).getJSONObject("formats").optString("url"));
+                    if (jsonObj.optString("totalresultsreturned").equals("0")) {
+                        return "Não encontrou resultado";
+                    }
+                    else {
+                        JSONArray jsonArray = jsonObj.getJSONArray("product");
+                        for (int i = 0; i < jsonArray.length(); i++) {
+                            JSONObject jsonProduto = jsonArray.getJSONObject(i).getJSONObject("product");
+                            //SE O NOME CURTO DO PRODUTO ESTÁ PRESENTE NO JSON
+                            if (jsonProduto.isNull("productshortname")) {
+                                listaNomes.add(jsonProduto.optString("productname"));
                             }
                             else {
+                                listaNomes.add(jsonProduto.optString("productshortname"));
+                            }
+
+                            //SE O PREÇO MÍNIMO DO PRODUTO ESTÁ PRESENTE NO JSON
+                            if (jsonProduto.isNull("pricemin")) {
+                                listaPrecos.add("Produto não disponível");
+                            }
+                            else {
+                                listaPrecos.add("R$" + jsonProduto.optString("pricemin"));
+                            }
+
+                            //SE O PRODUTO NÃO POSSUI FOTO
+                            if (jsonProduto.isNull("thumbnail")) {
                                 listaImagens.add("assets://SemImagem.png");
                             }
+                            else {
+                                //SE A FOTO NA RESOLUÇÃO 300X300 ESTÁ DISPONÍVEL
+                                if (!jsonProduto.getJSONObject("thumbnail").getJSONArray("formats").isNull(1)) {
+                                    listaImagens.add(jsonProduto.getJSONObject("thumbnail").getJSONArray("formats").getJSONObject(1).getJSONObject("formats").optString("url"));
+                                }
+                                else {
+                                    listaImagens.add("assets://SemImagem.png");
+                                }
+                            }
+
+                            //ADICIONA A URL PARA ACESSO DO PRODUTO NO SITE DO BUSCAPÉ
+                            String linkOfertasProduto = jsonProduto.getJSONArray("links").getJSONObject(1).getJSONObject("link").optString("url");
+
+                            //ADICIONA O FORMAT=JSON AO LINK DE OFERTA DO PRODUTO
+                            linkOfertasProduto = linkOfertasProduto.substring(0, linkOfertasProduto.indexOf("?productId")) + "?format=json&" + linkOfertasProduto.substring(linkOfertasProduto.indexOf("?productId")+1, linkOfertasProduto.length());
+                            listaLinks.add(linkOfertasProduto);
+
+                            //listaLinks.add(jsonProduto.getJSONArray("links").getJSONObject(0).getJSONObject("link").optString("url"));
                         }
-
-                        //ADICIONA A URL PARA ACESSO DO PRODUTO NO SITE DO BUSCAPÉ
-                        String linkOfertasProduto = jsonProduto.getJSONArray("links").getJSONObject(1).getJSONObject("link").optString("url");
-
-                        //ADICIONA O FORMAT=JSON AO LINK DE OFERTA DO PRODUTO
-                        linkOfertasProduto = linkOfertasProduto.substring(0, linkOfertasProduto.indexOf("?productId")) + "?format=json&" + linkOfertasProduto.substring(linkOfertasProduto.indexOf("?productId")+1, linkOfertasProduto.length());
-                        listaLinks.add(linkOfertasProduto);
-
-                        //listaLinks.add(jsonProduto.getJSONArray("links").getJSONObject(0).getJSONObject("link").optString("url"));
+                        return null;
                     }
                 } catch (JSONException e) {
                     Log.e("AsyncTaskPesquisa", "Não foi possível recuperar os dados do JSON");
@@ -321,24 +326,29 @@ public class InicioFragment extends Fragment {
         @Override
         protected void onPostExecute(String s) {
             progressDialog.dismiss();
+            //SE É DIFERENTE DE NULL ENTÃO NÃO ENCONTROU NENHUM RESULTADO PARA A PESQUISA
+            if (s != null) {
+                Toast.makeText(getActivity(), "Não encontramos seu produto :(", Toast.LENGTH_LONG).show();
+            }
+            else {
+                //INSTÂNCIA DO FRAGMENT 'LISTA DE PRODUTOS'
+                ProdutosFragment produtosFragment = new ProdutosFragment();
 
-            //INSTÂNCIA DO FRAGMENT 'LISTA DE PRODUTOS'
-            ProdutosFragment produtosFragment = new ProdutosFragment();
+                //BUNDLE RESPONSÁVEL POR ENVIAR AS LISTAS RESULTANTES DA PESQUISA DO PRODUTO AO FRAGMENT LISTA
+                Bundle bundle = new Bundle();
+                bundle.putStringArrayList("listaNomes", listaNomes);
+                bundle.putStringArrayList("listaPrecos", listaPrecos);
+                bundle.putStringArrayList("listaImagens", listaImagens);
+                bundle.putStringArrayList("listaLinks", listaLinks);
 
-            //BUNDLE RESPONSÁVEL POR ENVIAR AS LISTAS RESULTANTES DA PESQUISA DO PRODUTO AO FRAGMENT LISTA
-            Bundle bundle = new Bundle();
-            bundle.putStringArrayList("listaNomes", listaNomes);
-            bundle.putStringArrayList("listaPrecos", listaPrecos);
-            bundle.putStringArrayList("listaImagens", listaImagens);
-            bundle.putStringArrayList("listaLinks", listaLinks);
+                produtosFragment.setArguments(bundle);
 
-            produtosFragment.setArguments(bundle);
-
-            //TROCA O FRAGMENT DA ACTIVITY PARA O FRAGMENT 'LISTA DE PRODUTOS'
-            FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
-            transaction.replace(R.id.container, produtosFragment);
-            transaction.addToBackStack(null);
-            transaction.commit();
+                //TROCA O FRAGMENT DA ACTIVITY PARA O FRAGMENT 'LISTA DE PRODUTOS'
+                FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
+                transaction.replace(R.id.container, produtosFragment);
+                transaction.addToBackStack(null);
+                transaction.commit();
+            }
         }
     }
 
@@ -356,8 +366,8 @@ public class InicioFragment extends Fragment {
                     }
                     JSONObject jsonObject = new JSONObject(jsonStr);
                     for (int i = 0; i < jsonObject.getJSONArray("palavras").length(); i++) {
-                        String nomeProdutoSugerido = jsonObject.getJSONArray("palavras").getString(i);
-                        listaProdutosSugeridos.add(nomeProdutoSugerido);
+                         String nomeProdutoSugerido = jsonObject.getJSONArray("palavras").getString(i);
+                         listaProdutosSugeridos.add(nomeProdutoSugerido);
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();

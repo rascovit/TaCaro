@@ -12,7 +12,7 @@ public class MainActivity extends ActionBarActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
+        getSupportActionBar().hide();
         //CRIAÇÃO DO FRAGMENT INICIO QUE CONTÉM O CAMPO DE PESQUISA DO PRODUTO E O BOTÃO PESQUISAR
         if (savedInstanceState == null) {
             InicioFragment inicioFragment = new InicioFragment();

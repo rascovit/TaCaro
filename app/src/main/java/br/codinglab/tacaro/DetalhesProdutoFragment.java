@@ -145,11 +145,12 @@ public class DetalhesProdutoFragment extends Fragment {
 
                         if (!jsonLoja.isNull("thumbnail")) {
                             linksImagensLoja.add(jsonLoja.getJSONObject("thumbnail").optString("url"));
+                            nomesLojas.add("");
                         }
                         else {
                             linksImagensLoja.add("assets://SemImagem.png");
+                            nomesLojas.add(jsonLoja.optString("sellername"));
                         }
-                        nomesLojas.add(jsonLoja.optString("sellername"));
                         precosLojas.add(jsonOferta.getJSONObject("price").optString("value"));
                     }
                 } catch (JSONException e) {

@@ -63,7 +63,7 @@ public class RecyclerViewAdapterOfertas extends RecyclerView.Adapter<RecyclerVie
         ImageView imageViewProduto = (ImageView) holder.view.findViewById(R.id.imagemProduto);
 
         //VERIFICA SE NÃO TEM IMAGEM. CASO NÃO TENHA, ENTÃO MOSTRE O TEXTVIEW COM O NOME DA LOJA
-        if (linksImgsLojas.get(position).equals("assets://SemImagem.png")) {
+        if (!nomesLojas.get(position).equals("")) {
             textViewNome.setText(nomesLojas.get(position));
             textViewNome.setVisibility(View.VISIBLE);
             ImageLoader.getInstance().displayImage("", imageViewLoja);
@@ -82,7 +82,7 @@ public class RecyclerViewAdapterOfertas extends RecyclerView.Adapter<RecyclerVie
         Typeface ralewayExtraLight = Typeface.createFromAsset(context.getAssets(), "Raleway-ExtraLight.ttf");
         Typeface ralewayLight = Typeface.createFromAsset(context.getAssets(), "Raleway-Light.ttf");
 
-        textViewPreco.setTypeface(ralewayLight);
+        textViewPreco.setTypeface(ralewayExtraLight);
         textViewNome.setTypeface(ralewayExtraLight);
     }
 

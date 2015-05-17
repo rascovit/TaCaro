@@ -23,7 +23,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:id="@+id/textViewNomeProduto"
-                android:textSize="16sp"
+                android:textSize="18sp"
                 android:layout_alignParentTop="true"
                 android:layout_centerHorizontal="true"
                 android:layout_marginBottom="8dp" />
@@ -33,7 +33,7 @@
                 android:layout_height="wrap_content"
                 android:id="@+id/textViewPrecoProduto"
                 android:layout_below="@+id/textViewNomeProduto"
-                android:textSize="17sp"
+                android:textSize="18sp"
                 android:layout_marginBottom="8dp"
                 android:layout_centerHorizontal="true" />
 
