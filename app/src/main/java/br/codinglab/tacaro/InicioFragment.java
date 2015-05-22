@@ -37,6 +37,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.NumberFormat;
 import java.util.ArrayList;
 
 
@@ -55,6 +56,7 @@ public class InicioFragment extends Fragment {
     private ArrayList<String> listaProdutosSugeridos;
     private ArrayList<String> listaImagens;
     private String url = "http://sandbox.buscape.com.br/service/findProductList/4454485358486e4f31326f3d/BR/?format=json&keyword=";
+    private NumberFormat formatacaoMoeda;
 
     public InicioFragment() {
         // Required empty public constructor
@@ -75,6 +77,7 @@ public class InicioFragment extends Fragment {
         listaLinks = new ArrayList<>();
         listaProdutosSugeridos = new ArrayList<>();
         listaImagens = new ArrayList<>();
+        formatacaoMoeda = NumberFormat.getCurrencyInstance();
 
         //CONFIGURAÇÕES DO UNIVERSAL IMAGE LOADER (IMAGE CACHE E ASYNC REMOTE LOAD)
         DisplayImageOptions defaultOptions = new DisplayImageOptions.Builder()
@@ -286,7 +289,9 @@ public class InicioFragment extends Fragment {
                                 listaPrecos.add("Produto não disponível");
                             }
                             else {
-                                listaPrecos.add("R$" + jsonProduto.optString("pricemin"));
+                                String precoProduto = jsonProduto.optString("pricemin");
+                                precoProduto = formatacaoMoeda.format(Double.parseDouble(precoProduto));
+                                listaPrecos.add(precoProduto);
                             }
 
                             //SE O PRODUTO NÃO POSSUI FOTO
@@ -305,7 +310,6 @@ public class InicioFragment extends Fragment {
 
                             //ADICIONA A URL PARA ACESSO DO PRODUTO NO SITE DO BUSCAPÉ
                             String linkOfertasProduto = jsonProduto.getJSONArray("links").getJSONObject(1).getJSONObject("link").optString("url");
-
                             //ADICIONA O FORMAT=JSON AO LINK DE OFERTA DO PRODUTO
                             linkOfertasProduto = linkOfertasProduto.substring(0, linkOfertasProduto.indexOf("?productId")) + "?format=json&" + linkOfertasProduto.substring(linkOfertasProduto.indexOf("?productId")+1, linkOfertasProduto.length());
                             listaLinks.add(linkOfertasProduto);

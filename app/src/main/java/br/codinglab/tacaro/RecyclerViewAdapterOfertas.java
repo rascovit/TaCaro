@@ -76,7 +76,7 @@ public class RecyclerViewAdapterOfertas extends RecyclerView.Adapter<RecyclerVie
 
         //SETA O TEXTO PARA O NOME DO PRODUTO E PREÇO
         textViewNome.setText(nomesLojas.get(position));
-        textViewPreco.setText("R$" + precos.get(position));
+        textViewPreco.setText(precos.get(position));
         textViewPreco.setTextColor(Color.parseColor("#FF212121"));
 
         Typeface ralewayExtraLight = Typeface.createFromAsset(context.getAssets(), "Raleway-ExtraLight.ttf");

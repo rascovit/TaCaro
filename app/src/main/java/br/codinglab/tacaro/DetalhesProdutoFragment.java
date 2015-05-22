@@ -13,13 +13,17 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.RatingBar;
 import android.widget.TextView;
+
+import com.nostra13.universalimageloader.core.ImageLoader;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.text.NumberFormat;
 import java.util.ArrayList;
 
 
@@ -37,6 +41,7 @@ public class DetalhesProdutoFragment extends Fragment {
     private RecyclerView.LayoutManager layoutManager;
     private RatingBar avaliacaoProduto;
     private TextView textViewNumAvaliacoes;
+    private NumberFormat formatacaoMoeda;
 
     public DetalhesProdutoFragment() {
         // Required empty public constructor
@@ -54,20 +59,25 @@ public class DetalhesProdutoFragment extends Fragment {
         layoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(layoutManager);
 
+
         TextView textViewNomeProduto = (TextView) rootView.findViewById(R.id.textViewNomeProduto);
         TextView textViewPrecoProduto = (TextView) rootView.findViewById(R.id.textViewPrecoProduto);
+        ImageView imageViewProduto = (ImageView) rootView.findViewById(R.id.imageViewProduto);
         textViewNumAvaliacoes = (TextView) rootView.findViewById(R.id.textViewNumAvaliacoes);
+        TextView textViewLabelPreco = (TextView) rootView.findViewById(R.id.textViewLabelPreco);
         avaliacaoProduto = (RatingBar) rootView.findViewById(R.id.avaliacaoProduto);
 
         linksImagensLoja = new ArrayList<>();
         nomesLojas = new ArrayList<>();
         precosLojas = new ArrayList<>();
         linksImagensProdutos = new ArrayList<>();
+        formatacaoMoeda = NumberFormat.getCurrencyInstance();
 
         String nomeProduto = getArguments().getString("nomeProduto");
         String precoProduto = getArguments().getString("precoProduto");
         String linkProduto = getArguments().getString("linkProduto");
-        //ImageLoader.getInstance().displayImage(imagemProduto, imageViewProduto);
+        String imagemProduto = getArguments().getString("imagemProduto");
+        ImageLoader.getInstance().displayImage(imagemProduto, imageViewProduto);
         textViewNomeProduto.setText(nomeProduto);
 
         //VERIFICA SE O PRODUTO POSSUI UM PREÇO OU NÃO PARA EXIBIR
@@ -75,7 +85,7 @@ public class DetalhesProdutoFragment extends Fragment {
             textViewPrecoProduto.setText(precoProduto);
         }
         else {
-            textViewPrecoProduto.setText("O mais barato custa " + precoProduto);
+            textViewPrecoProduto.setText(precoProduto);
         }
 
         textViewNomeProduto.setTextColor(Color.parseColor("#FF434343"));
@@ -84,9 +94,10 @@ public class DetalhesProdutoFragment extends Fragment {
         Typeface ralewayExtraLight = Typeface.createFromAsset(getActivity().getAssets(), "Raleway-ExtraLight.ttf");
         Typeface ralewayLight = Typeface.createFromAsset(getActivity().getAssets(), "Raleway-Light.ttf");
 
-        textViewNomeProduto.setTypeface(ralewayExtraLight);
+        textViewNomeProduto.setTypeface(ralewayLight);
         textViewPrecoProduto.setTypeface(ralewayLight);
         textViewNumAvaliacoes.setTypeface(ralewayLight);
+        textViewLabelPreco.setTypeface(ralewayExtraLight);
 
         new AsyncTaskPesquisaOfertas().execute(linkProduto);
 
@@ -120,10 +131,11 @@ public class DetalhesProdutoFragment extends Fragment {
                     JSONArray jsonProduto = jsonObj.getJSONArray("product");
 
                     final String numeroAvaliacoes = jsonProduto.getJSONObject(0).getJSONObject("product").getJSONObject("rating").getJSONObject("useraveragerating").optString("numcomments");
+                    //PARA SETAR VALOR DE TEXTVIEW É NECESSÁRIO FAZER NA THREAD DA VIEW
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
-                            textViewNumAvaliacoes.setText(numeroAvaliacoes + " avaliações");
+                            textViewNumAvaliacoes.setText(numeroAvaliacoes + " avaliaram");
                         }
                     });
 
@@ -151,7 +163,9 @@ public class DetalhesProdutoFragment extends Fragment {
                             linksImagensLoja.add("assets://SemImagem.png");
                             nomesLojas.add(jsonLoja.optString("sellername"));
                         }
-                        precosLojas.add(jsonOferta.getJSONObject("price").optString("value"));
+                        String precoOferta = jsonOferta.getJSONObject("price").optString("value");
+                        precoOferta = formatacaoMoeda.format(Double.parseDouble(precoOferta));
+                        precosLojas.add(precoOferta);
                     }
                 } catch (JSONException e) {
                     Log.e("AsyncTaskPesquisa", "Não foi possível recuperar os dados do JSON: " + e.toString());
