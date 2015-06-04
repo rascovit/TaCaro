@@ -36,6 +36,8 @@ public class DetalhesProdutoFragment extends Fragment {
     private ArrayList<String> nomesLojas;
     private ArrayList<String> precosLojas;
     private ArrayList<String> linksImagensProdutos;
+    private ArrayList<String> linksProdutosBuscape;
+    private ArrayList<String> listaDetalhesTecnicos;
     private RecyclerView recyclerView;
     private RecyclerView.Adapter adapter;
     private RecyclerView.LayoutManager layoutManager;
@@ -59,7 +61,6 @@ public class DetalhesProdutoFragment extends Fragment {
         layoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(layoutManager);
 
-
         TextView textViewNomeProduto = (TextView) rootView.findViewById(R.id.textViewNomeProduto);
         TextView textViewPrecoProduto = (TextView) rootView.findViewById(R.id.textViewPrecoProduto);
         ImageView imageViewProduto = (ImageView) rootView.findViewById(R.id.imageViewProduto);
@@ -77,6 +78,10 @@ public class DetalhesProdutoFragment extends Fragment {
         String precoProduto = getArguments().getString("precoProduto");
         String linkProduto = getArguments().getString("linkProduto");
         String imagemProduto = getArguments().getString("imagemProduto");
+        String linkProdutoBuscape = getArguments().getString("linkProdutoBuscape");
+        linksProdutosBuscape = getArguments().getStringArrayList("linksProdutosBuscape");
+        listaDetalhesTecnicos = getArguments().getStringArrayList("listaDetalhesTecnicos");
+
         ImageLoader.getInstance().displayImage(imagemProduto, imageViewProduto);
         textViewNomeProduto.setText(nomeProduto);
 
@@ -131,7 +136,7 @@ public class DetalhesProdutoFragment extends Fragment {
                     JSONArray jsonProduto = jsonObj.getJSONArray("product");
 
                     final String numeroAvaliacoes = jsonProduto.getJSONObject(0).getJSONObject("product").getJSONObject("rating").getJSONObject("useraveragerating").optString("numcomments");
-                    //PARA SETAR VALOR DE TEXTVIEW É NECESSÁRIO FAZER NA THREAD DA VIEW
+                    //PARA SETAR VALOR DE TEXTVIEW É NECESSÁRIO FAZER NA THREAD PRINCIPAL (UI THREAD)
                     getActivity().runOnUiThread(new Runnable() {
                         @Override
                         public void run() {
@@ -180,7 +185,7 @@ public class DetalhesProdutoFragment extends Fragment {
         @Override
         protected void onPostExecute(String s) {
             progressDialog.dismiss();
-            adapter = new RecyclerViewAdapterOfertas(getActivity(), precosLojas, linksImagensLoja, nomesLojas, linksImagensProdutos);
+            adapter = new RecyclerViewAdapterOfertas(getActivity(), precosLojas, linksImagensLoja, nomesLojas, linksImagensProdutos, linksProdutosBuscape);
             recyclerView.setAdapter(adapter);
         }
     }

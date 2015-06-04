@@ -55,6 +55,8 @@ public class InicioFragment extends Fragment {
     private ArrayList<String> listaLinks;
     private ArrayList<String> listaProdutosSugeridos;
     private ArrayList<String> listaImagens;
+    private ArrayList<String> listaLinksBuscapeProdutos;
+    private ArrayList<String> listaDetalhesTecnicosProdutos;
     private String url = "http://sandbox.buscape.com.br/service/findProductList/4454485358486e4f31326f3d/BR/?format=json&keyword=";
     private NumberFormat formatacaoMoeda;
 
@@ -77,6 +79,8 @@ public class InicioFragment extends Fragment {
         listaLinks = new ArrayList<>();
         listaProdutosSugeridos = new ArrayList<>();
         listaImagens = new ArrayList<>();
+        listaLinksBuscapeProdutos = new ArrayList<>();
+        listaDetalhesTecnicosProdutos = new ArrayList<>();
         formatacaoMoeda = NumberFormat.getCurrencyInstance();
 
         //CONFIGURAÇÕES DO UNIVERSAL IMAGE LOADER (IMAGE CACHE E ASYNC REMOTE LOAD)
@@ -99,11 +103,8 @@ public class InicioFragment extends Fragment {
                     Toast.makeText(getActivity(), "Digite o nome do produto a ser pesquisado", Toast.LENGTH_SHORT).show();
                 } else {
                     if (estaConectadoInternet()) {
-                        if (!listaNomes.isEmpty()) {
-                            listaNomes.clear();
-                            listaLinks.clear();
-                            listaPrecos.clear();
-                            listaImagens.clear();
+                        if (listasEstaoVazias()) {
+                            limpaListasProdutosAnteriores();
                         }
                         urlPesquisa = "http://sandbox.buscape.com.br/service/findProductList/4454485358486e4f31326f3d/BR/?format=json&keyword=";
                         String nomeProduto = autoCompleteNome.getText().toString().replace(" ", "+");
@@ -138,11 +139,8 @@ public class InicioFragment extends Fragment {
                         Toast.makeText(getActivity(), "Digite o nome do produto a ser pesquisado", Toast.LENGTH_SHORT).show();
                     } else {
                         if (estaConectadoInternet()) {
-                            if (!listaNomes.isEmpty()) {
-                                listaNomes.clear();
-                                listaLinks.clear();
-                                listaPrecos.clear();
-                                listaImagens.clear();
+                            if (listasEstaoVazias()) {
+                                limpaListasProdutosAnteriores();
                             }
                             urlPesquisa = "http://sandbox.buscape.com.br/service/findProductList/4454485358486e4f31326f3d/BR/?format=json&keyword=";
                             String nomeProduto = autoCompleteNome.getText().toString().replace(" ", "+");
@@ -202,11 +200,8 @@ public class InicioFragment extends Fragment {
                     Toast.makeText(getActivity(), "Digite o nome do produto a ser pesquisado", Toast.LENGTH_SHORT).show();
                 } else {
                     if (estaConectadoInternet()) {
-                        if (!listaNomes.isEmpty()) {
-                            listaNomes.clear();
-                            listaLinks.clear();
-                            listaPrecos.clear();
-                            listaImagens.clear();
+                        if (listasEstaoVazias()) {
+                            limpaListasProdutosAnteriores();
                         }
                         urlPesquisa = "http://sandbox.buscape.com.br/service/findProductList/4454485358486e4f31326f3d/BR/?format=json&keyword=";
                         String nomeProduto = autoCompleteNome.getText().toString().replace(" ", "+");
@@ -247,6 +242,23 @@ public class InicioFragment extends Fragment {
                 }
         }
         return false;
+    }
+
+    //FUNÇÃO QUE VERIFICA SE AS LISTAS ESTÃO VAZIAS (CASO O USUÁRIO JÁ TENHA PESQUISADO ALGUM PRODUTO
+    private boolean listasEstaoVazias() {
+        if (!listaNomes.isEmpty()) {
+            return false;
+        }
+        return true;
+    }
+
+    //FUNÇÃO QUE LIMPA AS LISTAS SE ELAS JÁ POSSUIREM ALGO (CASO O USUÁRIO PESQUISE UM SEGUNDO PRODUTO)
+    private void limpaListasProdutosAnteriores() {
+        listaNomes.clear();
+        listaLinks.clear();
+        listaPrecos.clear();
+        listaImagens.clear();
+        listaLinksBuscapeProdutos.clear();
     }
 
     //ASYNCTASK PARA PESQUISA DE PRODUTOS DA API BUSCAPÉ
@@ -310,15 +322,23 @@ public class InicioFragment extends Fragment {
 
                             //ADICIONA A URL PARA ACESSO DO PRODUTO NO SITE DO BUSCAPÉ
                             String linkOfertasProduto = jsonProduto.getJSONArray("links").getJSONObject(1).getJSONObject("link").optString("url");
+
                             //ADICIONA O FORMAT=JSON AO LINK DE OFERTA DO PRODUTO
                             linkOfertasProduto = linkOfertasProduto.substring(0, linkOfertasProduto.indexOf("?productId")) + "?format=json&" + linkOfertasProduto.substring(linkOfertasProduto.indexOf("?productId")+1, linkOfertasProduto.length());
                             listaLinks.add(linkOfertasProduto);
 
-                            //listaLinks.add(jsonProduto.getJSONArray("links").getJSONObject(0).getJSONObject("link").optString("url"));
+                            //ADICIONA OS LINKS DOS PRODUTOS NO SITE DO BUSCAPÉ
+                            listaLinksBuscapeProdutos.add(jsonProduto.getJSONArray("links").getJSONObject(0).getJSONObject("link").optString("url"));
+
+                            //for (int j = 0; j < jsonProduto.getJSONObject("specification").getJSONArray("item").length(); j++) {
+                            //    listaDetalhesTecnicosProdutos.add(jsonProduto.getJSONObject("specification").getJSONArray("item").getJSONObject(j).getJSONObject("item").optString("label"));
+                            //    Log.d("OK", listaDetalhesTecnicosProdutos.get(i) + " " + i);
+                            //}
                         }
                         return null;
                     }
                 } catch (JSONException e) {
+                    e.printStackTrace();
                     Log.e("AsyncTaskPesquisa", "Não foi possível recuperar os dados do JSON");
                 }
             } else {
@@ -344,10 +364,12 @@ public class InicioFragment extends Fragment {
                 bundle.putStringArrayList("listaPrecos", listaPrecos);
                 bundle.putStringArrayList("listaImagens", listaImagens);
                 bundle.putStringArrayList("listaLinks", listaLinks);
+                bundle.putStringArrayList("listaLinksBuscape", listaLinksBuscapeProdutos);
+                bundle.putStringArrayList("listaDetalhesTecnicos", listaDetalhesTecnicosProdutos);
 
                 produtosFragment.setArguments(bundle);
 
-                //TROCA O FRAGMENT DA ACTIVITY PARA O FRAGMENT 'LISTA DE PRODUTOS'
+                //SUBSTITUI O FRAGMENT ATUAL DA ACTIVITY (INICIOFRAGMENT) PARA O FRAGMENT 'LISTA DE PRODUTOS'
                 FragmentTransaction transaction = getActivity().getSupportFragmentManager().beginTransaction();
                 transaction.replace(R.id.container, produtosFragment);
                 transaction.addToBackStack(null);

@@ -33,6 +33,8 @@ public class ProdutosFragment extends Fragment {
         ArrayList<String> listaPrecos;
         ArrayList<String> listaImagens;
         ArrayList<String> listaLinks;
+        ArrayList<String> listaLinksBuscape;
+        ArrayList<String> listaDetalhesTecnicos;
 
         //RECYCLERVIEW PARA A LISTA DE PRODUTOS
         recyclerView = (RecyclerView) rootView.findViewById(R.id.recyclerView);
@@ -40,14 +42,16 @@ public class ProdutosFragment extends Fragment {
         layoutManager = new LinearLayoutManager(getActivity());
         recyclerView.setLayoutManager(layoutManager);
 
-        //RECEBE O QUE FOI PASSADO VIA BUNDLE DO FRAGMENT ANTERIOR
+        //RECEBE O QUE FOI PASSADO VIA BUNDLE DO FRAGMENT ANTERIOR (InicioFragment)
         listaNomes = getArguments().getStringArrayList("listaNomes");
         listaPrecos = getArguments().getStringArrayList("listaPrecos");
         listaImagens = getArguments().getStringArrayList("listaImagens");
         listaLinks = getArguments().getStringArrayList("listaLinks");
+        listaLinksBuscape = getArguments().getStringArrayList("listaLinksBuscape");
+        listaDetalhesTecnicos = getArguments().getStringArrayList("listaDetalhesTecnicos");
 
         //CRIA NOVO ADAPTER DA RECYCLERVIEW PASSANDO AS LISTAS
-        adapter = new RecyclerViewAdapter(getActivity(), listaNomes, listaPrecos, listaImagens, listaLinks);
+        adapter = new RecyclerViewAdapter(getActivity(), listaNomes, listaPrecos, listaImagens, listaLinks, listaLinksBuscape, listaDetalhesTecnicos);
         recyclerView.setAdapter(adapter);
 
         return rootView;

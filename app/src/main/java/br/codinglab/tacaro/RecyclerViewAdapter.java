@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -27,6 +26,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     private ArrayList<String> precos;
     private ArrayList<String> linksImgs;
     private ArrayList<String> linksProduto;
+    private ArrayList<String> linksProdutoBuscape;
+    private ArrayList<String> listaDetalhesTecnicos;
     private Context context;
 
     // Provide a reference to the views for each data item
@@ -43,12 +44,15 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     // Provide a suitable constructor (depends on the kind of dataset)
     public RecyclerViewAdapter(Context context, ArrayList<String> nomes, ArrayList<String> precos,
-                               ArrayList<String> linksImgs, ArrayList<String> linksProduto) {
+                               ArrayList<String> linksImgs, ArrayList<String> linksProduto,
+                               ArrayList<String> linksProdutoBuscape, ArrayList<String> listaDetalhesTecnicos) {
         this.context = context;
         this.nomes = nomes;
         this.precos = precos;
         this.linksImgs = linksImgs;
         this.linksProduto = linksProduto;
+        this.linksProdutoBuscape = linksProdutoBuscape;
+        this.listaDetalhesTecnicos = listaDetalhesTecnicos;
     }
 
     // Create new views (invoked by the layout manager)
@@ -97,6 +101,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                 bundle.putString("precoProduto", precos.get(position));
                 bundle.putString("imagemProduto", linksImgs.get(position));
                 bundle.putString("linkProduto", linksProduto.get(position));
+                bundle.putStringArrayList("linksProdutosBuscape", linksProdutoBuscape);
+                bundle.putStringArrayList("listaDetalhesTecnicos", listaDetalhesTecnicos);
                 detalhesProdutoFragment.setArguments(bundle);
 
                 //TROCA O FRAGMENT DA ACTIVITY PARA O FRAGMENT 'DETALHES DO PRODUTO'

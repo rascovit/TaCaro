@@ -1,8 +1,10 @@
 package br.codinglab.tacaro;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Typeface;
+import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -20,6 +22,7 @@ public class RecyclerViewAdapterOfertas extends RecyclerView.Adapter<RecyclerVie
     private ArrayList<String> linksImgsLojas;
     private ArrayList<String> nomesLojas;
     private ArrayList<String> linksImgsProdutos;
+    private ArrayList<String> linksProdutosBuscape;
     private Context context;
 
     // Provide a reference to the views for each data item
@@ -35,12 +38,15 @@ public class RecyclerViewAdapterOfertas extends RecyclerView.Adapter<RecyclerVie
     }
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public RecyclerViewAdapterOfertas(Context context, ArrayList<String> precos, ArrayList<String> linksImgsLojas, ArrayList<String> nomesLojas, ArrayList<String> linksImgsProdutos) {
+    public RecyclerViewAdapterOfertas(Context context, ArrayList<String> precos,
+                                      ArrayList<String> linksImgsLojas, ArrayList<String> nomesLojas,
+                                      ArrayList<String> linksImgsProdutos, ArrayList<String> linksProdutosBuscape) {
         this.context = context;
         this.precos = precos;
         this.linksImgsLojas = linksImgsLojas;
         this.nomesLojas = nomesLojas;
         this.linksImgsProdutos = linksImgsProdutos;
+        this.linksProdutosBuscape = linksProdutosBuscape;
     }
 
     // Create new views (invoked by the layout manager)
@@ -78,6 +84,14 @@ public class RecyclerViewAdapterOfertas extends RecyclerView.Adapter<RecyclerVie
         textViewNome.setText(nomesLojas.get(position));
         textViewPreco.setText(precos.get(position));
         textViewPreco.setTextColor(Color.parseColor("#FF212121"));
+
+        //AO CLICAR EM UMA OFERTA, O APP ABRE O LINK CAPTURADO DO JSON (LINK DO PRODUTO NO BUSCAPÉ)
+        holder.view.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                v.getContext().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(linksProdutosBuscape.get(position))));
+            }
+        });
 
         Typeface ralewayExtraLight = Typeface.createFromAsset(context.getAssets(), "Raleway-ExtraLight.ttf");
         Typeface ralewayLight = Typeface.createFromAsset(context.getAssets(), "Raleway-Light.ttf");
