@@ -1,11 +1,12 @@
 package Produtos;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 /**
  * Created by PC MASTER RACE on 05/06/2015.
  */
-public class BuscaPeProduct {
+public class BuscaPeProduct implements Serializable {
     private String fullProductName;
     private double maxProductPrice;
     private double minProductPrice;
@@ -39,6 +40,7 @@ public class BuscaPeProduct {
         this.productCategoryId = productCategoryId;
         this.thumbNails = new ArrayList<>();
         this.productSpecification = new ArrayList<>();
+        this.productOffers = new ArrayList<>();
         this.haveSpefication = false;
     }
 

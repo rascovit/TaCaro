@@ -1,9 +1,11 @@
 package Produtos;
 
+import java.io.Serializable;
+
 /**
  * Created by PC MASTER RACE on 05/06/2015.
  */
-public class Seller {
+public class Seller implements Serializable {
     private String sellerName;
     private int sellerId;
     private ThumbNail sellerThumbNail;

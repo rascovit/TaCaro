@@ -1,9 +1,11 @@
 package Produtos;
 
+import java.io.Serializable;
+
 /**
  * Created by PC MASTER RACE on 05/06/2015.
  */
-public class ThumbNail {
+public class ThumbNail implements Serializable {
     private int width;
     private int height;
     private String url;

@@ -1,9 +1,11 @@
 package Produtos;
 
+import java.io.Serializable;
+
 /**
  * Created by PC MASTER RACE on 05/06/2015.
  */
-public class Specification {
+public class Specification implements Serializable {
 
     private String label;
     private String value;

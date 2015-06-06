@@ -1,9 +1,11 @@
 package Produtos;
 
+import java.io.Serializable;
+
 /**
  * Created by PC MASTER RACE on 05/06/2015.
  */
-public class SellerRatings {
+public class SellerRatings implements Serializable {
     private double rating;
     private String rantingType;
 

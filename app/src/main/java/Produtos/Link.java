@@ -1,9 +1,11 @@
 package Produtos;
 
+import java.io.Serializable;
+
 /**
  * Created by PC MASTER RACE on 05/06/2015.
  */
-public class Link {
+public class Link implements Serializable {
 
     private String productUrl;
     private String productJsonUrl;
