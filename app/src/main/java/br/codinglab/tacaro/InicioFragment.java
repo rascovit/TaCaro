@@ -41,7 +41,11 @@ import java.text.NumberFormat;
 import java.util.ArrayList;
 
 import Produtos.BuscaPeProduct;
+import Produtos.Link;
+import Produtos.Offer;
 import Produtos.ProductRatings;
+import Produtos.Seller;
+import Produtos.SellerRatings;
 import Produtos.Specification;
 import Produtos.ThumbNail;
 
@@ -308,50 +312,92 @@ public class InicioFragment extends Fragment {
                         int productId = Integer.parseInt(jsonObj.optString("id"));
                         int productCategoryId = Integer.parseInt(jsonObj.optString("categoryid"));
 
-
-
-
                         BuscaPeProduct tempProduct = new BuscaPeProduct(fullProductName,maxPrice,minPrice,quantity,amountOfOffers,amountOfSellers,productId,productCategoryId);
 
 
-
-
                         /*THUMB NAILS*/
-                        ArrayList<ThumbNail> thumbNails = new ArrayList<>();
                         JSONArray jsonThumbNailArray = jsonObj.getJSONObject("thumbnail").getJSONArray("formats");
                         for (int j = 0; j < jsonThumbNailArray.length(); j++) {
-                            int width = Integer.parseInt(jsonThumbNailArray.getJSONObject(i).getJSONObject("formats").optString("width"));
-                            int height = Integer.parseInt(jsonThumbNailArray.getJSONObject(i).getJSONObject("formats").optString("height"));
-                            String url = jsonThumbNailArray.getJSONObject(i).getJSONObject("formats").optString("url");
+                            int width = Integer.parseInt(jsonThumbNailArray.getJSONObject(j).getJSONObject("formats").optString("width"));
+                            int height = Integer.parseInt(jsonThumbNailArray.getJSONObject(j).getJSONObject("formats").optString("height"));
+                            String url = jsonThumbNailArray.getJSONObject(j).getJSONObject("formats").optString("url");
                             tempProduct.setThumbNail(new ThumbNail(width, height, url));
                         }
 
 
                         /*SPEFICIATIONS*/
-
                         if(!jsonObj.getJSONObject("specification").isNull("item")){
-
-                            ArrayList<ThumbNail> specifications = new ArrayList<>();
                             JSONArray productSpecification = jsonObj.getJSONObject("specification").getJSONArray("item");
                             for (int j = 0; j < productSpecification.length(); j++) {
-                                String label = productSpecification.getJSONObject(i).getJSONObject("item").getString("label");
-                                JSONArray values = productSpecification.getJSONObject(i).getJSONObject("item").getJSONArray("label");
+                                String label = productSpecification.getJSONObject(j).getJSONObject("item").getString("label");
+                                JSONArray values = productSpecification.getJSONObject(j).getJSONObject("item").getJSONArray("label");
                                 String sumValues = "";
                                 for(int k = 0; k < values.length(); k++){
-                                    sumValues += values.getString(i);
+                                    sumValues += values.getString(k);
                                 }
                                 tempProduct.setSpecification(new Specification(label,sumValues));
 
                             }
                         }
 
-
-
-
                         /*PRODUCT RATINGS*/
                         double rating = Double.parseDouble(jsonObj.getJSONObject("rating").getJSONObject("useraveragerating").getString("rating"));
+                        ProductRatings productRatings = new ProductRatings(rating);
+                        tempProduct.setProductRatings(productRatings);
+
+                        /*LINKS*/
+                        JSONArray productLinks = jsonObj.getJSONArray("links");
+                        for (int j = 0; j < productLinks.length(); j++) {
+                            String jsonUrl = "";
+                            String productUrl = "";
+                            if(productLinks.getJSONObject(j).getJSONObject("link").getString("type") == "product"){
+                                productUrl = productLinks.getJSONObject(j).getJSONObject("link").getString("url");
+                            }else{
+                                jsonUrl = productLinks.getJSONObject(j).getJSONObject("link").getString("url");
+                            }
+                            tempProduct.setProductLink(new Link(productUrl, jsonUrl));
+                        }
 
                         /*OFFERS*/
+
+                        String offersJson = serviceHandler.makeServiceCall(tempProduct.getProductLink().getProductJsonUrl(), ServiceHandler.GET);
+
+                        JSONObject generalOffersJson = new JSONObject(offersJson);
+
+                        JSONArray offerArray = generalOffersJson.getJSONArray("offer");
+
+                        for(int o = 1; o < offerArray.length(); o++){
+
+                            JSONObject seller = offerArray.getJSONObject(i).getJSONObject("seller");
+
+                            String logoUrl = seller.getJSONObject("thumbnail").getString("url");
+                            ThumbNail sellerThumbNail = new ThumbNail(0,0,logoUrl);
+
+                            String sellerRatingType = seller.getJSONObject("rating").getJSONObject("ebitrating").getString("rating");
+                            double sellerRating = Double.parseDouble(seller.getJSONObject("rating").getJSONObject("useraveragerating").getString("rating"));
+                            SellerRatings sellerRatings = new SellerRatings(sellerRating,sellerRatingType);
+
+                            String sellerName = seller.getString("sellername");
+                            String sellerWebSiteUrl = seller.getJSONArray("links").getJSONObject(1).getJSONObject("link").getString("url");
+                            int sellerId = Integer.parseInt(seller.getString("id"));
+
+                            Seller productSeller = new Seller(sellerName,sellerId,sellerThumbNail,sellerRatings,sellerWebSiteUrl);
+
+
+                            int offerProductId = Integer.parseInt(offerArray.getJSONObject(i).getString("productid"));
+                            String offerName = offerArray.getJSONObject(i).getString("offername");
+                            double fullPrice = Double.parseDouble(offerArray.getJSONObject(i).getJSONObject("price").getString("value"));
+                            int amountOfParcels = Integer.parseInt(offerArray.getJSONObject(i).getJSONObject("price").getJSONObject("parcel").getString("number"));
+                            double parcelValue = Double.parseDouble(offerArray.getJSONObject(i).getJSONObject("price").getJSONObject("parcel").getString("value"));
+
+                            Offer tempOffer = new Offer(productSeller,productId,fullPrice,amountOfParcels,parcelValue,offerName);
+                            tempProduct.setOffer(tempOffer);
+                        }
+
+
+
+
+
 
 
                         generalListOfProducts.add(tempProduct);

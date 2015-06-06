@@ -15,10 +15,16 @@ public class BuscaPeProduct {
     private int productId;
     private int productCategoryId;
 
+
+
+
     private ArrayList<ThumbNail> thumbNails;
     private ArrayList<Specification> productSpecification;
     private boolean haveSpefication;
     private ProductRatings productRatings;
+    Link productLink;
+
+
 
     private ArrayList<Offer> productOffers;
 
@@ -34,6 +40,14 @@ public class BuscaPeProduct {
         this.thumbNails = new ArrayList<>();
         this.productSpecification = new ArrayList<>();
         this.haveSpefication = false;
+    }
+
+    public void setOffer(Offer offer){
+        productOffers.add(offer);
+    }
+
+    public void setProductLink(Link productLink) {
+        this.productLink = productLink;
     }
 
     public void setThumbNail(ThumbNail thumbNail) {
@@ -98,5 +112,9 @@ public class BuscaPeProduct {
 
     public ArrayList<Offer> getProductOffers() {
         return productOffers;
+    }
+
+    public Link getProductLink() {
+        return productLink;
     }
 }

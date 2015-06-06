@@ -10,7 +10,7 @@ public class Link {
 
     public Link(String productUrl, String productJsonUrl) {
         this.productUrl = productUrl;
-        this.productJsonUrl = productJsonUrl;
+        this.productJsonUrl = productJsonUrl.substring(0,productJsonUrl.indexOf("?") + 1) + "format=json&" + productJsonUrl.substring(productJsonUrl.indexOf("?") + 1);
     }
 
     public String getProductUrl() {
