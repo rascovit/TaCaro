@@ -287,30 +287,39 @@ public class InicioFragment extends Fragment {
         protected String doInBackground(Void... params) {
             ServiceHandler serviceHandler = new ServiceHandler();
             String jsonStr = serviceHandler.makeServiceCall(urlPesquisa, ServiceHandler.GET);
+
             if (jsonStr != null) {
 
                 /*SAMUEL*/
 
                 try {
+
                     JSONObject generalJsonObject = new JSONObject(jsonStr);
 
                     JSONArray jsonArray = generalJsonObject.getJSONArray("product");
 
                     ArrayList<BuscaPeProduct> generalListOfProducts = new ArrayList<>();
+
                     for(int i = 0 ; i < jsonArray.length(); i++ ){
 
                         JSONObject jsonObj = jsonArray.getJSONObject(i).getJSONObject("product");
 
 
                         /*INFORMAÇÕES BÁSICOS SOBRE A PESQUISA DE UM PRODUTO*/
-                        String fullProductName = jsonObj.optString("productname");
-                        double maxPrice = Double.parseDouble(jsonObj.optString("pricemax"));
-                        double minPrice = Double.parseDouble(jsonObj.optString("pricemin"));
-                        int quantity = Integer.parseInt(jsonObj.optString("quantity"));
-                        int amountOfOffers = Integer.parseInt(jsonObj.optString("numoffers"));
-                        int amountOfSellers = Integer.parseInt(jsonObj.optString("totalsellers"));
-                        int productId = Integer.parseInt(jsonObj.optString("id"));
-                        int productCategoryId = Integer.parseInt(jsonObj.optString("categoryid"));
+                        String fullProductName = jsonObj.getString("productname");
+                        double maxPrice;
+                        double minPrice = Double.parseDouble(jsonObj.getString("pricemin"));
+                        if(!jsonObj.isNull("pricemax")){
+                            maxPrice = Double.parseDouble(jsonObj.getString("pricemax"));
+                        }else{
+                            maxPrice = minPrice;
+                        }
+
+                        int quantity = Integer.parseInt(jsonObj.getString("quantity"));
+                        int amountOfOffers = Integer.parseInt(jsonObj.getString("numoffers"));
+                        int amountOfSellers = Integer.parseInt(jsonObj.getString("totalsellers"));
+                        int productId = Integer.parseInt(jsonObj.getString("id"));
+                        int productCategoryId = Integer.parseInt(jsonObj.getString("categoryid"));
 
                         BuscaPeProduct tempProduct = new BuscaPeProduct(fullProductName,maxPrice,minPrice,quantity,amountOfOffers,amountOfSellers,productId,productCategoryId);
 
@@ -330,10 +339,10 @@ public class InicioFragment extends Fragment {
                             JSONArray productSpecification = jsonObj.getJSONObject("specification").getJSONArray("item");
                             for (int j = 0; j < productSpecification.length(); j++) {
                                 String label = productSpecification.getJSONObject(j).getJSONObject("item").getString("label");
-                                JSONArray values = productSpecification.getJSONObject(j).getJSONObject("item").getJSONArray("label");
+                                JSONArray values = productSpecification.getJSONObject(j).getJSONObject("item").getJSONArray("value");
                                 String sumValues = "";
                                 for(int k = 0; k < values.length(); k++){
-                                    sumValues += values.getString(k);
+                                    sumValues += values.getString(k) + System.getProperty("line.separator");
                                 }
                                 tempProduct.setSpecification(new Specification(label,sumValues));
 
@@ -359,16 +368,15 @@ public class InicioFragment extends Fragment {
                         }
 
                         /*OFFERS*/
-
                         String offersJson = serviceHandler.makeServiceCall(tempProduct.getProductLink().getProductJsonUrl(), ServiceHandler.GET);
 
                         JSONObject generalOffersJson = new JSONObject(offersJson);
 
                         JSONArray offerArray = generalOffersJson.getJSONArray("offer");
 
-                        for(int o = 1; o < offerArray.length(); o++){
+                        for(int o = 0; o < offerArray.length(); o++){
 
-                            JSONObject seller = offerArray.getJSONObject(i).getJSONObject("seller");
+                            JSONObject seller = offerArray.getJSONObject(o).getJSONObject("offer").getJSONObject("seller");
 
                             String logoUrl = seller.getJSONObject("thumbnail").getString("url");
                             ThumbNail sellerThumbNail = new ThumbNail(0,0,logoUrl);
@@ -378,30 +386,35 @@ public class InicioFragment extends Fragment {
                             SellerRatings sellerRatings = new SellerRatings(sellerRating,sellerRatingType);
 
                             String sellerName = seller.getString("sellername");
-                            String sellerWebSiteUrl = seller.getJSONArray("links").getJSONObject(1).getJSONObject("link").getString("url");
+                            String sellerWebSiteUrl = seller.getJSONArray("links").getJSONObject(0).getJSONObject("link").getString("url");
                             int sellerId = Integer.parseInt(seller.getString("id"));
 
                             Seller productSeller = new Seller(sellerName,sellerId,sellerThumbNail,sellerRatings,sellerWebSiteUrl);
 
 
-                            int offerProductId = Integer.parseInt(offerArray.getJSONObject(i).getString("productid"));
-                            String offerName = offerArray.getJSONObject(i).getString("offername");
-                            double fullPrice = Double.parseDouble(offerArray.getJSONObject(i).getJSONObject("price").getString("value"));
-                            int amountOfParcels = Integer.parseInt(offerArray.getJSONObject(i).getJSONObject("price").getJSONObject("parcel").getString("number"));
-                            double parcelValue = Double.parseDouble(offerArray.getJSONObject(i).getJSONObject("price").getJSONObject("parcel").getString("value"));
+                            int offerProductId = Integer.parseInt(offerArray.getJSONObject(o).getJSONObject("offer").getString("productid"));
+                            String offerName = offerArray.getJSONObject(o).getJSONObject("offer").getString("offername");
+
+                            double fullPrice = 0.0;
+                            if(!offerArray.getJSONObject(o).getJSONObject("offer").getJSONObject("price").isNull("value")){
+                                fullPrice = Double.parseDouble(offerArray.getJSONObject(o).getJSONObject("offer").getJSONObject("price").getString("value"));
+                            }
+
+                            int amountOfParcels = 1;
+                            double parcelValue = fullPrice;
+                            if(!offerArray.getJSONObject(o).getJSONObject("offer").getJSONObject("price").isNull("parcel")){
+                                 amountOfParcels = Integer.parseInt(offerArray.getJSONObject(o).getJSONObject("offer").getJSONObject("price").getJSONObject("parcel").getString("number"));
+                                 parcelValue = Double.parseDouble(offerArray.getJSONObject(o).getJSONObject("offer").getJSONObject("price").getJSONObject("parcel").getString("value"));
+                            }
 
                             Offer tempOffer = new Offer(productSeller,productId,fullPrice,amountOfParcels,parcelValue,offerName);
                             tempProduct.setOffer(tempOffer);
                         }
 
-
-
-
-
-
-
                         generalListOfProducts.add(tempProduct);
                     }
+
+                    //Log.d("DEBBUG",generalListOfProducts.toString());
 
 
 
@@ -496,6 +509,7 @@ public class InicioFragment extends Fragment {
 
                 //BUNDLE RESPONSÁVEL POR ENVIAR AS LISTAS RESULTANTES DA PESQUISA DO PRODUTO AO FRAGMENT LISTA
                 Bundle bundle = new Bundle();
+
                 bundle.putStringArrayList("listaNomes", listaNomes);
                 bundle.putStringArrayList("listaPrecos", listaPrecos);
                 bundle.putStringArrayList("listaImagens", listaImagens);
