@@ -26,6 +26,8 @@ import org.json.JSONObject;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 
+import Produtos.BuscapeProduct;
+
 
 /**
  * A simple {@link Fragment} subclass.
@@ -73,6 +75,10 @@ public class DetalhesProdutoFragment extends Fragment {
         precosLojas = new ArrayList<>();
         linksImagensProdutos = new ArrayList<>();
         formatacaoMoeda = NumberFormat.getCurrencyInstance();
+
+
+        ArrayList<BuscapeProduct> lista = (ArrayList<BuscapeProduct>) getArguments().getSerializable("listinhaDoAmorDeProdutinhos");
+        Log.d("LISTATAMANHO", String.valueOf(lista.size()));
 
         String nomeProduto = getArguments().getString("nomeProduto");
         String precoProduto = getArguments().getString("precoProduto");

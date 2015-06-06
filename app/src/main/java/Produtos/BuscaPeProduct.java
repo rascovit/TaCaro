@@ -6,7 +6,7 @@ import java.util.ArrayList;
 /**
  * Created by PC MASTER RACE on 05/06/2015.
  */
-public class BuscaPeProduct implements Serializable {
+public class BuscapeProduct implements Serializable {
     private String fullProductName;
     private double maxProductPrice;
     private double minProductPrice;
@@ -29,7 +29,7 @@ public class BuscaPeProduct implements Serializable {
 
     private ArrayList<Offer> productOffers;
 
-    public BuscaPeProduct(String fullProductName, double maxProductPrice, double minProductPrice, int quantity, int amountOfOffers, int amountOfSellers, int productId, int productCategoryId) {
+    public BuscapeProduct(String fullProductName, double maxProductPrice, double minProductPrice, int quantity, int amountOfOffers, int amountOfSellers, int productId, int productCategoryId) {
         this.fullProductName = fullProductName;
         this.maxProductPrice = maxProductPrice;
         this.minProductPrice = minProductPrice;

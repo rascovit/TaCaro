@@ -40,7 +40,7 @@ import org.json.JSONObject;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 
-import Produtos.BuscaPeProduct;
+import Produtos.BuscapeProduct;
 import Produtos.Link;
 import Produtos.Offer;
 import Produtos.ProductRatings;
@@ -66,6 +66,7 @@ public class InicioFragment extends Fragment {
     private ArrayList<String> listaImagens;
     private ArrayList<String> listaLinksBuscapeProdutos;
     private ArrayList<String> listaDetalhesTecnicosProdutos;
+    ArrayList<BuscapeProduct> generalListOfProducts;
     private String url = "http://sandbox.buscape.com.br/service/findProductList/4454485358486e4f31326f3d/BR/?format=json&keyword=";
     private NumberFormat formatacaoMoeda;
 
@@ -90,6 +91,7 @@ public class InicioFragment extends Fragment {
         listaImagens = new ArrayList<>();
         listaLinksBuscapeProdutos = new ArrayList<>();
         listaDetalhesTecnicosProdutos = new ArrayList<>();
+        generalListOfProducts = new ArrayList<>();
         formatacaoMoeda = NumberFormat.getCurrencyInstance();
 
         //CONFIGURAÇÕES DO UNIVERSAL IMAGE LOADER (IMAGE CACHE E ASYNC REMOTE LOAD)
@@ -298,7 +300,7 @@ public class InicioFragment extends Fragment {
 
                     JSONArray jsonArray = generalJsonObject.getJSONArray("product");
 
-                    ArrayList<BuscaPeProduct> generalListOfProducts = new ArrayList<>();
+                    //ArrayList<BuscapeProduct> generalListOfProducts = new ArrayList<>();
 
                     for(int i = 0 ; i < jsonArray.length(); i++ ){
 
@@ -321,7 +323,7 @@ public class InicioFragment extends Fragment {
                         int productId = Integer.parseInt(jsonObj.getString("id"));
                         int productCategoryId = Integer.parseInt(jsonObj.getString("categoryid"));
 
-                        BuscaPeProduct tempProduct = new BuscaPeProduct(fullProductName,maxPrice,minPrice,quantity,amountOfOffers,amountOfSellers,productId,productCategoryId);
+                        BuscapeProduct tempProduct = new BuscapeProduct(fullProductName,maxPrice,minPrice,quantity,amountOfOffers,amountOfSellers,productId,productCategoryId);
 
 
                         /*THUMB NAILS*/
@@ -413,13 +415,6 @@ public class InicioFragment extends Fragment {
 
                         generalListOfProducts.add(tempProduct);
                     }
-
-                    //Log.d("DEBBUG",generalListOfProducts.toString());
-
-
-
-
-
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -510,6 +505,7 @@ public class InicioFragment extends Fragment {
                 //BUNDLE RESPONSÁVEL POR ENVIAR AS LISTAS RESULTANTES DA PESQUISA DO PRODUTO AO FRAGMENT LISTA
                 Bundle bundle = new Bundle();
 
+                bundle.putSerializable("listinhaDoAmorDeProdutinhos",generalListOfProducts);
                 bundle.putStringArrayList("listaNomes", listaNomes);
                 bundle.putStringArrayList("listaPrecos", listaPrecos);
                 bundle.putStringArrayList("listaImagens", listaImagens);
