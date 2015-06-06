@@ -12,14 +12,15 @@ public class Offer implements Serializable {
     private int amountOfParcels;
     private double parcelValue;
     private String offerName;
-
-    public Offer(Seller seller, int productId, double fullPrice, int amountOfParcels, double parcelValue, String offerName) {
+    private ThumbNail productThumbnail;
+    public Offer(Seller seller, int productId, double fullPrice, int amountOfParcels, double parcelValue, String offerName, ThumbNail productThumbnail) {
         this.seller = seller;
         this.productId = productId;
         this.fullPrice = fullPrice;
         this.amountOfParcels = amountOfParcels;
         this.parcelValue = parcelValue;
         this.offerName = offerName;
+        this.productThumbnail = productThumbnail;
     }
 
 
@@ -45,5 +46,13 @@ public class Offer implements Serializable {
 
     public String getOfferName() {
         return offerName;
+    }
+
+    public ThumbNail getProductThumbnail() {
+        return productThumbnail;
+    }
+
+    public void setProductThumbnail(ThumbNail productThumbnail) {
+        this.productThumbnail = productThumbnail;
     }
 }

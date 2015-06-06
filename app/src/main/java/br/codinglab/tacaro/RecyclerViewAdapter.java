@@ -17,17 +17,14 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 
 import java.util.ArrayList;
 
+import Produtos.BuscapeProduct;
+
 /* CÓDIGO FONTE FORNECIDO PELA GOOGLE PARA IMPLEMENTAÇÃO DO RECYCLERVIEW ADAPTER */
 /* CONTÉM ALTERAÇÕES NO CONSTRUTOR (POSSUI O PARAMETRO CONTEXT A MAIS PARA CARREGAR AS FONTES DOS ASSETS */
 
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
 
-    private ArrayList<String> nomes;
-    private ArrayList<String> precos;
-    private ArrayList<String> linksImgs;
-    private ArrayList<String> linksProduto;
-    private ArrayList<String> linksProdutoBuscape;
-    private ArrayList<String> listaDetalhesTecnicos;
+    private ArrayList<BuscapeProduct> listaProdutos;
     private Context context;
 
     // Provide a reference to the views for each data item
@@ -43,16 +40,9 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     }
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public RecyclerViewAdapter(Context context, ArrayList<String> nomes, ArrayList<String> precos,
-                               ArrayList<String> linksImgs, ArrayList<String> linksProduto,
-                               ArrayList<String> linksProdutoBuscape, ArrayList<String> listaDetalhesTecnicos) {
+    public RecyclerViewAdapter(Context context, ArrayList<BuscapeProduct> listaProdutos) {
         this.context = context;
-        this.nomes = nomes;
-        this.precos = precos;
-        this.linksImgs = linksImgs;
-        this.linksProduto = linksProduto;
-        this.linksProdutoBuscape = linksProdutoBuscape;
-        this.listaDetalhesTecnicos = listaDetalhesTecnicos;
+        this.listaProdutos = listaProdutos;
     }
 
     // Create new views (invoked by the layout manager)
@@ -74,11 +64,11 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         ImageView imageView = (ImageView) holder.view.findViewById(R.id.imagemProduto);
 
         //CARREGA A IMAGEM DA POSIÇÃO 'POSITION' ATRAVÉS DA URL DA LISTA
-        ImageLoader.getInstance().displayImage(linksImgs.get(position), imageView);
+        ImageLoader.getInstance().displayImage(listaProdutos.get(position).getThumbNails().get(1).getUrl(), imageView);
 
         //SETA O TEXTO PARA O NOME DO PRODUTO E PREÇO
-        textViewNome.setText(nomes.get(position));
-        textViewPreco.setText(precos.get(position));
+        textViewNome.setText(listaProdutos.get(position).getFullProductName());
+        textViewPreco.setText("R$" + String.valueOf(listaProdutos.get(position).getMinProductPrice()));
         textViewNome.setTextColor(Color.parseColor("#FF434343"));
         textViewPreco.setTextColor(Color.parseColor("#FF212121"));
 
@@ -97,12 +87,14 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
                 //BUNDLE RESPONSÁVEL POR ENVIAR AS LISTAS RESULTANTES DA PESQUISA DO PRODUTO AO FRAGMENT LISTA
                 Bundle bundle = new Bundle();
-                bundle.putString("nomeProduto", nomes.get(position));
-                bundle.putString("precoProduto", precos.get(position));
-                bundle.putString("imagemProduto", linksImgs.get(position));
-                bundle.putString("linkProduto", linksProduto.get(position));
-                bundle.putStringArrayList("linksProdutosBuscape", linksProdutoBuscape);
-                bundle.putStringArrayList("listaDetalhesTecnicos", listaDetalhesTecnicos);
+                bundle.putString("nomeProduto", listaProdutos.get(position).getFullProductName());
+                bundle.putString("precoProduto", String.valueOf(listaProdutos.get(position).getMinProductPrice()));
+                bundle.putString("imagemProduto", listaProdutos.get(position).getThumbNails().get(1).getUrl());
+                bundle.putString("linkProduto", listaProdutos.get(position).getProductLink().getProductUrl());
+                bundle.putSerializable("listaOfertas", listaProdutos.get(position).getProductOffers());
+                bundle.putInt("qtdeAvaliacoes", listaProdutos.get(position).getRatingAmount());
+                bundle.putDouble("notaProduto", listaProdutos.get(position).getProductRatings().getRating());
+                bundle.putSerializable("listaEspecificacoes", listaProdutos.get(position).getProductSpecification());
                 detalhesProdutoFragment.setArguments(bundle);
 
                 //TROCA O FRAGMENT DA ACTIVITY PARA O FRAGMENT 'DETALHES DO PRODUTO'
@@ -116,6 +108,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
 
     @Override
     public int getItemCount() {
-        return nomes.size();
+        return listaProdutos.size();
     }
 }

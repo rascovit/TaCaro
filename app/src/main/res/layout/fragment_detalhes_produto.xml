@@ -78,6 +78,15 @@
                     android:id="@+id/textViewNumAvaliacoes"
                     android:textSize="14sp"
                     android:layout_marginLeft="6dp" />
+
+                <Button
+                    style="?android:attr/buttonStyleSmall"
+                    android:layout_width="wrap_content"
+                    android:layout_height="38dp"
+                    android:text="detalhes >>"
+                    android:textColor="#ff777777"
+                    android:backgroundTint="#F5F5F5"
+                    android:id="@+id/btnIrParaDetalhes" />
             </LinearLayout>
 
 

@@ -16,7 +16,6 @@ import android.text.Editable;
 import android.text.InputFilter;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -59,14 +58,8 @@ public class InicioFragment extends Fragment {
     private String urlPesquisa;
     private AutoCompleteTextView autoCompleteNome;
     private ImageView imageViewLogo;
-    private ArrayList<String> listaNomes;
-    private ArrayList<String> listaPrecos;
-    private ArrayList<String> listaLinks;
+    private ArrayList<BuscapeProduct> generalListOfProducts;
     private ArrayList<String> listaProdutosSugeridos;
-    private ArrayList<String> listaImagens;
-    private ArrayList<String> listaLinksBuscapeProdutos;
-    private ArrayList<String> listaDetalhesTecnicosProdutos;
-    ArrayList<BuscapeProduct> generalListOfProducts;
     private String url = "http://sandbox.buscape.com.br/service/findProductList/4454485358486e4f31326f3d/BR/?format=json&keyword=";
     private NumberFormat formatacaoMoeda;
 
@@ -83,14 +76,7 @@ public class InicioFragment extends Fragment {
         btnPesquisar = (Button) rootView.findViewById(R.id.btnPesquisar);
         autoCompleteNome = (AutoCompleteTextView) rootView.findViewById(R.id.editTextNomeProduto);
         imageViewLogo = (ImageView) rootView.findViewById(R.id.imageViewLogo);
-
-        listaNomes = new ArrayList<>();
-        listaPrecos = new ArrayList<>();
-        listaLinks = new ArrayList<>();
         listaProdutosSugeridos = new ArrayList<>();
-        listaImagens = new ArrayList<>();
-        listaLinksBuscapeProdutos = new ArrayList<>();
-        listaDetalhesTecnicosProdutos = new ArrayList<>();
         generalListOfProducts = new ArrayList<>();
         formatacaoMoeda = NumberFormat.getCurrencyInstance();
 
@@ -114,9 +100,6 @@ public class InicioFragment extends Fragment {
                     Toast.makeText(getActivity(), "Digite o nome do produto a ser pesquisado", Toast.LENGTH_SHORT).show();
                 } else {
                     if (estaConectadoInternet()) {
-                        if (listasEstaoVazias()) {
-                            limpaListasProdutosAnteriores();
-                        }
                         urlPesquisa = "http://sandbox.buscape.com.br/service/findProductList/4454485358486e4f31326f3d/BR/?format=json&keyword=";
                         String nomeProduto = autoCompleteNome.getText().toString().replace(" ", "+");
                         urlPesquisa += nomeProduto;
@@ -131,45 +114,6 @@ public class InicioFragment extends Fragment {
                         Toast.makeText(getActivity(), "Você não está conectado à Internet", Toast.LENGTH_SHORT).show();
                     }
                 }
-            }
-        });
-
-        //LISTENER DA TECLA 'PESQUISAR' DO TECLADO VIRTUAL
-        autoCompleteNome.setOnKeyListener(new View.OnKeyListener() {
-            @Override
-            public boolean onKey(View v, int keyCode, KeyEvent event) {
-                if (event.getAction() != KeyEvent.ACTION_DOWN) {
-                    return false;
-                }
-                if (event.getKeyCode() == KeyEvent.KEYCODE_BACK) {
-                    return false;
-                }
-                //VERIFICA SE O USUÁRIO ESTÁ DELETANDO O TEXTO DIGITADO
-                if (event.getKeyCode() != KeyEvent.KEYCODE_DEL) {
-                    if (autoCompleteNome.getText().toString().equals("")) {
-                        Toast.makeText(getActivity(), "Digite o nome do produto a ser pesquisado", Toast.LENGTH_SHORT).show();
-                    } else {
-                        if (estaConectadoInternet()) {
-                            if (listasEstaoVazias()) {
-                                limpaListasProdutosAnteriores();
-                            }
-                            urlPesquisa = "http://sandbox.buscape.com.br/service/findProductList/4454485358486e4f31326f3d/BR/?format=json&keyword=";
-                            String nomeProduto = autoCompleteNome.getText().toString().replace(" ", "+");
-                            urlPesquisa += nomeProduto;
-                            new AsyncTaskPesquisa().execute();
-
-                            //PARA ESCONDER O TECLADO VIRTUAL QUANDO APERTAR O BOTÃO PARA PESQUISAR
-                            InputMethodManager imm = (InputMethodManager) getActivity().getSystemService(
-                                    Context.INPUT_METHOD_SERVICE);
-                            imm.hideSoftInputFromWindow(autoCompleteNome.getWindowToken(), 0);
-                        } else {
-                            Intent intent = new Intent(Settings.ACTION_SETTINGS);
-                            startActivity(intent);
-                            Toast.makeText(getActivity(), "Você não está conectado à Internet", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                }
-                return true;
             }
         });
 
@@ -211,9 +155,6 @@ public class InicioFragment extends Fragment {
                     Toast.makeText(getActivity(), "Digite o nome do produto a ser pesquisado", Toast.LENGTH_SHORT).show();
                 } else {
                     if (estaConectadoInternet()) {
-                        if (listasEstaoVazias()) {
-                            limpaListasProdutosAnteriores();
-                        }
                         urlPesquisa = "http://sandbox.buscape.com.br/service/findProductList/4454485358486e4f31326f3d/BR/?format=json&keyword=";
                         String nomeProduto = autoCompleteNome.getText().toString().replace(" ", "+");
                         urlPesquisa += nomeProduto;
@@ -255,23 +196,6 @@ public class InicioFragment extends Fragment {
         return false;
     }
 
-    //FUNÇÃO QUE VERIFICA SE AS LISTAS ESTÃO VAZIAS (CASO O USUÁRIO JÁ TENHA PESQUISADO ALGUM PRODUTO
-    private boolean listasEstaoVazias() {
-        if (!listaNomes.isEmpty()) {
-            return false;
-        }
-        return true;
-    }
-
-    //FUNÇÃO QUE LIMPA AS LISTAS SE ELAS JÁ POSSUIREM ALGO (CASO O USUÁRIO PESQUISE UM SEGUNDO PRODUTO)
-    private void limpaListasProdutosAnteriores() {
-        listaNomes.clear();
-        listaLinks.clear();
-        listaPrecos.clear();
-        listaImagens.clear();
-        listaLinksBuscapeProdutos.clear();
-    }
-
     //ASYNCTASK PARA PESQUISA DE PRODUTOS DA API BUSCAPÉ
     class AsyncTaskPesquisa extends AsyncTask<Void, Void, String> {
 
@@ -291,22 +215,15 @@ public class InicioFragment extends Fragment {
             String jsonStr = serviceHandler.makeServiceCall(urlPesquisa, ServiceHandler.GET);
 
             if (jsonStr != null) {
-
+                if (!generalListOfProducts.isEmpty()) {
+                    generalListOfProducts.clear();
+                }
                 /*SAMUEL*/
-
                 try {
-
                     JSONObject generalJsonObject = new JSONObject(jsonStr);
-
                     JSONArray jsonArray = generalJsonObject.getJSONArray("product");
-
-                    //ArrayList<BuscapeProduct> generalListOfProducts = new ArrayList<>();
-
                     for(int i = 0 ; i < jsonArray.length(); i++ ){
-
                         JSONObject jsonObj = jsonArray.getJSONObject(i).getJSONObject("product");
-
-
                         /*INFORMAÇÕES BÁSICOS SOBRE A PESQUISA DE UM PRODUTO*/
                         String fullProductName = jsonObj.getString("productname");
                         double maxPrice;
@@ -316,15 +233,14 @@ public class InicioFragment extends Fragment {
                         }else{
                             maxPrice = minPrice;
                         }
-
                         int quantity = Integer.parseInt(jsonObj.getString("quantity"));
                         int amountOfOffers = Integer.parseInt(jsonObj.getString("numoffers"));
                         int amountOfSellers = Integer.parseInt(jsonObj.getString("totalsellers"));
                         int productId = Integer.parseInt(jsonObj.getString("id"));
                         int productCategoryId = Integer.parseInt(jsonObj.getString("categoryid"));
+                        int ratingAmount = Integer.parseInt(jsonObj.getJSONObject("rating").getJSONObject("useraveragerating").optString("numcomments"));
 
-                        BuscapeProduct tempProduct = new BuscapeProduct(fullProductName,maxPrice,minPrice,quantity,amountOfOffers,amountOfSellers,productId,productCategoryId);
-
+                        BuscapeProduct tempProduct = new BuscapeProduct(fullProductName,maxPrice,minPrice,quantity,amountOfOffers,amountOfSellers,productId,productCategoryId,ratingAmount);
 
                         /*THUMB NAILS*/
                         JSONArray jsonThumbNailArray = jsonObj.getJSONObject("thumbnail").getJSONArray("formats");
@@ -380,7 +296,11 @@ public class InicioFragment extends Fragment {
 
                             JSONObject seller = offerArray.getJSONObject(o).getJSONObject("offer").getJSONObject("seller");
 
-                            String logoUrl = seller.getJSONObject("thumbnail").getString("url");
+                            String logoUrl = "";
+                            if (!seller.isNull("thumbnail")) {
+                                logoUrl = seller.getJSONObject("thumbnail").getString("url");
+                            }
+
                             ThumbNail sellerThumbNail = new ThumbNail(0,0,logoUrl);
 
                             String sellerRatingType = seller.getJSONObject("rating").getJSONObject("ebitrating").getString("rating");
@@ -409,82 +329,19 @@ public class InicioFragment extends Fragment {
                                  parcelValue = Double.parseDouble(offerArray.getJSONObject(o).getJSONObject("offer").getJSONObject("price").getJSONObject("parcel").getString("value"));
                             }
 
-                            Offer tempOffer = new Offer(productSeller,productId,fullPrice,amountOfParcels,parcelValue,offerName);
+                            String url = offerArray.getJSONObject(o).getJSONObject("offer").getJSONObject("thumbnail").optString("url");
+                            ThumbNail thumbNail = new ThumbNail(0,0,url);
+                            Offer tempOffer = new Offer(productSeller,productId,fullPrice,amountOfParcels,parcelValue,offerName,thumbNail);
                             tempProduct.setOffer(tempOffer);
                         }
-
                         generalListOfProducts.add(tempProduct);
                     }
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
 
-
                 /*END - SAMUEL*/
 
-
-                try {
-                    JSONObject jsonObj = new JSONObject(jsonStr);
-                    if (jsonObj.optString("totalresultsreturned").equals("0")) {
-                        return "Não encontrou resultado";
-                    }
-                    else {
-                        JSONArray jsonArray = jsonObj.getJSONArray("product");
-                        for (int i = 0; i < jsonArray.length(); i++) {
-                            JSONObject jsonProduto = jsonArray.getJSONObject(i).getJSONObject("product");
-                            //SE O NOME CURTO DO PRODUTO ESTÁ PRESENTE NO JSON
-                            if (jsonProduto.isNull("productshortname")) {
-                                listaNomes.add(jsonProduto.optString("productname"));
-                            }
-                            else {
-                                listaNomes.add(jsonProduto.optString("productshortname"));
-                            }
-
-                            //SE O PREÇO MÍNIMO DO PRODUTO ESTÁ PRESENTE NO JSON
-                            if (jsonProduto.isNull("pricemin")) {
-                                listaPrecos.add("Produto não disponível");
-                            }
-                            else {
-                                String precoProduto = jsonProduto.optString("pricemin");
-                                precoProduto = formatacaoMoeda.format(Double.parseDouble(precoProduto));
-                                listaPrecos.add(precoProduto);
-                            }
-
-                            //SE O PRODUTO NÃO POSSUI FOTO
-                            if (jsonProduto.isNull("thumbnail")) {
-                                listaImagens.add("assets://SemImagem.png");
-                            }
-                            else {
-                                //SE A FOTO NA RESOLUÇÃO 300X300 ESTÁ DISPONÍVEL
-                                if (!jsonProduto.getJSONObject("thumbnail").getJSONArray("formats").isNull(1)) {
-                                    listaImagens.add(jsonProduto.getJSONObject("thumbnail").getJSONArray("formats").getJSONObject(1).getJSONObject("formats").optString("url"));
-                                }
-                                else {
-                                    listaImagens.add("assets://SemImagem.png");
-                                }
-                            }
-
-                            //ADICIONA A URL PARA ACESSO DO PRODUTO NO SITE DO BUSCAPÉ
-                            String linkOfertasProduto = jsonProduto.getJSONArray("links").getJSONObject(1).getJSONObject("link").optString("url");
-
-                            //ADICIONA O FORMAT=JSON AO LINK DE OFERTA DO PRODUTO
-                            linkOfertasProduto = linkOfertasProduto.substring(0, linkOfertasProduto.indexOf("?productId")) + "?format=json&" + linkOfertasProduto.substring(linkOfertasProduto.indexOf("?productId")+1, linkOfertasProduto.length());
-                            listaLinks.add(linkOfertasProduto);
-
-                            //ADICIONA OS LINKS DOS PRODUTOS NO SITE DO BUSCAPÉ
-                            listaLinksBuscapeProdutos.add(jsonProduto.getJSONArray("links").getJSONObject(0).getJSONObject("link").optString("url"));
-
-                            //for (int j = 0; j < jsonProduto.getJSONObject("specification").getJSONArray("item").length(); j++) {
-                            //    listaDetalhesTecnicosProdutos.add(jsonProduto.getJSONObject("specification").getJSONArray("item").getJSONObject(j).getJSONObject("item").optString("label"));
-                            //    Log.d("OK", listaDetalhesTecnicosProdutos.get(i) + " " + i);
-                            //}
-                        }
-                        return null;
-                    }
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                    Log.e("AsyncTaskPesquisa", "Não foi possível recuperar os dados do JSON");
-                }
             } else {
                 Log.e("ServiceHandler", "Não foi possível recuperar os dados da URL.");
             }
@@ -504,15 +361,7 @@ public class InicioFragment extends Fragment {
 
                 //BUNDLE RESPONSÁVEL POR ENVIAR AS LISTAS RESULTANTES DA PESQUISA DO PRODUTO AO FRAGMENT LISTA
                 Bundle bundle = new Bundle();
-
-                bundle.putSerializable("listinhaDoAmorDeProdutinhos",generalListOfProducts);
-                bundle.putStringArrayList("listaNomes", listaNomes);
-                bundle.putStringArrayList("listaPrecos", listaPrecos);
-                bundle.putStringArrayList("listaImagens", listaImagens);
-                bundle.putStringArrayList("listaLinks", listaLinks);
-                bundle.putStringArrayList("listaLinksBuscape", listaLinksBuscapeProdutos);
-                bundle.putStringArrayList("listaDetalhesTecnicos", listaDetalhesTecnicosProdutos);
-
+                bundle.putSerializable("listaProdutos",generalListOfProducts);
                 produtosFragment.setArguments(bundle);
 
                 //SUBSTITUI O FRAGMENT ATUAL DA ACTIVITY (INICIOFRAGMENT) PARA O FRAGMENT 'LISTA DE PRODUTOS'

@@ -6,7 +6,7 @@ import java.util.ArrayList;
 /**
  * Created by PC MASTER RACE on 05/06/2015.
  */
-public class BuscapeProduct implements Serializable {
+public class BuscapeProduct implements Serializable{
     private String fullProductName;
     private double maxProductPrice;
     private double minProductPrice;
@@ -16,20 +16,16 @@ public class BuscapeProduct implements Serializable {
     private int productId;
     private int productCategoryId;
 
-
-
-
     private ArrayList<ThumbNail> thumbNails;
     private ArrayList<Specification> productSpecification;
     private boolean haveSpefication;
     private ProductRatings productRatings;
+    private int ratingAmount;
     Link productLink;
-
-
 
     private ArrayList<Offer> productOffers;
 
-    public BuscapeProduct(String fullProductName, double maxProductPrice, double minProductPrice, int quantity, int amountOfOffers, int amountOfSellers, int productId, int productCategoryId) {
+    public BuscapeProduct(String fullProductName, double maxProductPrice, double minProductPrice, int quantity, int amountOfOffers, int amountOfSellers, int productId, int productCategoryId, int ratingAmount) {
         this.fullProductName = fullProductName;
         this.maxProductPrice = maxProductPrice;
         this.minProductPrice = minProductPrice;
@@ -42,6 +38,8 @@ public class BuscapeProduct implements Serializable {
         this.productSpecification = new ArrayList<>();
         this.productOffers = new ArrayList<>();
         this.haveSpefication = false;
+        this.productOffers = new ArrayList<>();
+        this.ratingAmount = ratingAmount;
     }
 
     public void setOffer(Offer offer){
@@ -118,5 +116,9 @@ public class BuscapeProduct implements Serializable {
 
     public Link getProductLink() {
         return productLink;
+    }
+
+    public int getRatingAmount() {
+        return ratingAmount;
     }
 }

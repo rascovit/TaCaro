@@ -16,13 +16,11 @@ import com.nostra13.universalimageloader.core.ImageLoader;
 
 import java.util.ArrayList;
 
+import Produtos.Offer;
+
 public class RecyclerViewAdapterOfertas extends RecyclerView.Adapter<RecyclerViewAdapterOfertas.ViewHolder> {
 
-    private ArrayList<String> precos;
-    private ArrayList<String> linksImgsLojas;
-    private ArrayList<String> nomesLojas;
-    private ArrayList<String> linksImgsProdutos;
-    private ArrayList<String> linksProdutosBuscape;
+    private ArrayList<Offer> listaOfertas;
     private Context context;
 
     // Provide a reference to the views for each data item
@@ -38,15 +36,9 @@ public class RecyclerViewAdapterOfertas extends RecyclerView.Adapter<RecyclerVie
     }
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public RecyclerViewAdapterOfertas(Context context, ArrayList<String> precos,
-                                      ArrayList<String> linksImgsLojas, ArrayList<String> nomesLojas,
-                                      ArrayList<String> linksImgsProdutos, ArrayList<String> linksProdutosBuscape) {
+    public RecyclerViewAdapterOfertas(Context context, ArrayList<Offer> listaOfertas) {
         this.context = context;
-        this.precos = precos;
-        this.linksImgsLojas = linksImgsLojas;
-        this.nomesLojas = nomesLojas;
-        this.linksImgsProdutos = linksImgsProdutos;
-        this.linksProdutosBuscape = linksProdutosBuscape;
+        this.listaOfertas = listaOfertas;
     }
 
     // Create new views (invoked by the layout manager)
@@ -69,27 +61,27 @@ public class RecyclerViewAdapterOfertas extends RecyclerView.Adapter<RecyclerVie
         ImageView imageViewProduto = (ImageView) holder.view.findViewById(R.id.imagemProduto);
 
         //VERIFICA SE NÃO TEM IMAGEM. CASO NÃO TENHA, ENTÃO MOSTRE O TEXTVIEW COM O NOME DA LOJA
-        if (!nomesLojas.get(position).equals("")) {
-            textViewNome.setText(nomesLojas.get(position));
+        if (listaOfertas.get(position).getSeller().getSellerThumbNail().equals("")) {
+            textViewNome.setText(listaOfertas.get(position).getSeller().getSellerName());
             textViewNome.setVisibility(View.VISIBLE);
             ImageLoader.getInstance().displayImage("", imageViewLoja);
         }
         else {
-            ImageLoader.getInstance().displayImage(linksImgsLojas.get(position), imageViewLoja);
+            ImageLoader.getInstance().displayImage(listaOfertas.get(position).getSeller().getSellerThumbNail().getUrl(), imageViewLoja);
         }
 
-        ImageLoader.getInstance().displayImage(linksImgsProdutos.get(position), imageViewProduto);
+        ImageLoader.getInstance().displayImage(listaOfertas.get(position).getProductThumbnail().getUrl(), imageViewProduto);
 
         //SETA O TEXTO PARA O NOME DO PRODUTO E PREÇO
-        textViewNome.setText(nomesLojas.get(position));
-        textViewPreco.setText(precos.get(position));
+        textViewNome.setText(listaOfertas.get(position).getOfferName());
+        textViewPreco.setText("R$" + String.valueOf(listaOfertas.get(position).getFullPrice()));
         textViewPreco.setTextColor(Color.parseColor("#FF212121"));
 
         //AO CLICAR EM UMA OFERTA, O APP ABRE O LINK CAPTURADO DO JSON (LINK DO PRODUTO NO BUSCAPÉ)
         holder.view.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                v.getContext().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(linksProdutosBuscape.get(position))));
+                v.getContext().startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(listaOfertas.get(position).getSeller().getSellerWebSiteUrl())));
             }
         });
 
@@ -102,6 +94,6 @@ public class RecyclerViewAdapterOfertas extends RecyclerView.Adapter<RecyclerVie
 
     @Override
     public int getItemCount() {
-        return precos.size();
+        return listaOfertas.size();
     }
 }
