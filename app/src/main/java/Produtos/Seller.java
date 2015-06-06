@@ -8,11 +8,11 @@ import java.io.Serializable;
 public class Seller implements Serializable {
     private String sellerName;
     private int sellerId;
-    private ThumbNail sellerThumbNail;
+    private Thumbnail sellerThumbNail;
     private SellerRatings sellerRatings;
     private String sellerWebSiteUrl;
 
-    public Seller(String sellerName, int sellerId, ThumbNail sellerThumbNail, SellerRatings sellerRatings, String sellerWebSiteUrl) {
+    public Seller(String sellerName, int sellerId, Thumbnail sellerThumbNail, SellerRatings sellerRatings, String sellerWebSiteUrl) {
         this.sellerName = sellerName;
         this.sellerId = sellerId;
         this.sellerThumbNail = sellerThumbNail;
@@ -28,7 +28,7 @@ public class Seller implements Serializable {
         return sellerId;
     }
 
-    public ThumbNail getSellerThumbNail() {
+    public Thumbnail getSellerThumbNail() {
         return sellerThumbNail;
     }
 

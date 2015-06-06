@@ -64,7 +64,12 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         ImageView imageView = (ImageView) holder.view.findViewById(R.id.imagemProduto);
 
         //CARREGA A IMAGEM DA POSIÇÃO 'POSITION' ATRAVÉS DA URL DA LISTA
-        ImageLoader.getInstance().displayImage(listaProdutos.get(position).getThumbNails().get(1).getUrl(), imageView);
+        if (listaProdutos.get(position).getThumbNails().size() > 1) {
+            ImageLoader.getInstance().displayImage(listaProdutos.get(position).getThumbNails().get(1).getUrl(), imageView);
+        }
+        else {
+            ImageLoader.getInstance().displayImage(listaProdutos.get(position).getThumbNails().get(0).getUrl(), imageView);
+        }
 
         //SETA O TEXTO PARA O NOME DO PRODUTO E PREÇO
         textViewNome.setText(listaProdutos.get(position).getFullProductName());

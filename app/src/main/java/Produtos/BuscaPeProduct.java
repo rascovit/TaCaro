@@ -16,7 +16,7 @@ public class BuscapeProduct implements Serializable{
     private int productId;
     private int productCategoryId;
 
-    private ArrayList<ThumbNail> thumbNails;
+    private ArrayList<Thumbnail> thumbNails;
     private ArrayList<Specification> productSpecification;
     private boolean haveSpefication;
     private ProductRatings productRatings;
@@ -50,7 +50,7 @@ public class BuscapeProduct implements Serializable{
         this.productLink = productLink;
     }
 
-    public void setThumbNail(ThumbNail thumbNail) {
+    public void setThumbNail(Thumbnail thumbNail) {
         this.thumbNails.add(thumbNail);
     }
     public void setSpecification(Specification specification) {
@@ -98,7 +98,7 @@ public class BuscapeProduct implements Serializable{
         return productCategoryId;
     }
 
-    public ArrayList<ThumbNail> getThumbNails() {
+    public ArrayList<Thumbnail> getThumbNails() {
         return thumbNails;
     }
 

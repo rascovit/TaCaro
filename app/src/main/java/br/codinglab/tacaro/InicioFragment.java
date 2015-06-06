@@ -46,7 +46,7 @@ import Produtos.ProductRatings;
 import Produtos.Seller;
 import Produtos.SellerRatings;
 import Produtos.Specification;
-import Produtos.ThumbNail;
+import Produtos.Thumbnail;
 
 
 /**
@@ -218,7 +218,6 @@ public class InicioFragment extends Fragment {
                 if (!generalListOfProducts.isEmpty()) {
                     generalListOfProducts.clear();
                 }
-                /*SAMUEL*/
                 try {
                     JSONObject generalJsonObject = new JSONObject(jsonStr);
                     JSONArray jsonArray = generalJsonObject.getJSONArray("product");
@@ -242,13 +241,17 @@ public class InicioFragment extends Fragment {
 
                         BuscapeProduct tempProduct = new BuscapeProduct(fullProductName,maxPrice,minPrice,quantity,amountOfOffers,amountOfSellers,productId,productCategoryId,ratingAmount);
 
-                        /*THUMB NAILS*/
+                        /*THUMBNAILS*/
                         JSONArray jsonThumbNailArray = jsonObj.getJSONObject("thumbnail").getJSONArray("formats");
                         for (int j = 0; j < jsonThumbNailArray.length(); j++) {
-                            int width = Integer.parseInt(jsonThumbNailArray.getJSONObject(j).getJSONObject("formats").optString("width"));
-                            int height = Integer.parseInt(jsonThumbNailArray.getJSONObject(j).getJSONObject("formats").optString("height"));
+                            int width = 0;
+                            int height = 0;
+                            if (jsonThumbNailArray.getJSONObject(j).isNull("formats")) {
+                                width = Integer.parseInt(jsonThumbNailArray.getJSONObject(j).getJSONObject("formats").optString("width"));
+                                height = Integer.parseInt(jsonThumbNailArray.getJSONObject(j).getJSONObject("formats").optString("height"));
+                            }
                             String url = jsonThumbNailArray.getJSONObject(j).getJSONObject("formats").optString("url");
-                            tempProduct.setThumbNail(new ThumbNail(width, height, url));
+                            tempProduct.setThumbNail(new Thumbnail(width, height, url));
                         }
 
 
@@ -287,35 +290,44 @@ public class InicioFragment extends Fragment {
 
                         /*OFFERS*/
                         String offersJson = serviceHandler.makeServiceCall(tempProduct.getProductLink().getProductJsonUrl(), ServiceHandler.GET);
-
                         JSONObject generalOffersJson = new JSONObject(offersJson);
-
                         JSONArray offerArray = generalOffersJson.getJSONArray("offer");
-
                         for(int o = 0; o < offerArray.length(); o++){
-
                             JSONObject seller = offerArray.getJSONObject(o).getJSONObject("offer").getJSONObject("seller");
-
                             String logoUrl = "";
                             if (!seller.isNull("thumbnail")) {
                                 logoUrl = seller.getJSONObject("thumbnail").getString("url");
                             }
+                            Thumbnail sellerThumbNail = new Thumbnail(0,0,logoUrl);
 
-                            ThumbNail sellerThumbNail = new ThumbNail(0,0,logoUrl);
+                            String sellerRatingType = "";
+                            if (!seller.getJSONObject("rating").isNull("ebitrating")) {
+                                sellerRatingType = seller.getJSONObject("rating").getJSONObject("ebitrating").getString("rating");
+                            }
 
-                            String sellerRatingType = seller.getJSONObject("rating").getJSONObject("ebitrating").getString("rating");
-                            double sellerRating = Double.parseDouble(seller.getJSONObject("rating").getJSONObject("useraveragerating").getString("rating"));
+                            double sellerRating = 0.0;
+                            if (!seller.getJSONObject("rating").isNull("useraveragerating")) {
+                                sellerRating = Double.parseDouble(seller.getJSONObject("rating").getJSONObject("useraveragerating").getString("rating"));
+                            }
                             SellerRatings sellerRatings = new SellerRatings(sellerRating,sellerRatingType);
 
                             String sellerName = seller.getString("sellername");
-                            String sellerWebSiteUrl = seller.getJSONArray("links").getJSONObject(0).getJSONObject("link").getString("url");
-                            int sellerId = Integer.parseInt(seller.getString("id"));
 
+                            String sellerWebSiteUrl = "";
+                            if (!seller.getJSONArray("links").getJSONObject(0).isNull("link")) {
+                                sellerWebSiteUrl = seller.getJSONArray("links").getJSONObject(0).getJSONObject("link").getString("url");
+                            }
+                            int sellerId = Integer.parseInt(seller.getString("id"));
                             Seller productSeller = new Seller(sellerName,sellerId,sellerThumbNail,sellerRatings,sellerWebSiteUrl);
 
 
-                            int offerProductId = Integer.parseInt(offerArray.getJSONObject(o).getJSONObject("offer").getString("productid"));
-                            String offerName = offerArray.getJSONObject(o).getJSONObject("offer").getString("offername");
+                            int offerProductId;
+                            String offerName = "";
+                            if (!offerArray.getJSONObject(o).isNull("offer")) {
+                                offerProductId = Integer.parseInt(offerArray.getJSONObject(o).getJSONObject("offer").getString("productid"));
+                                offerName = offerArray.getJSONObject(o).getJSONObject("offer").getString("offername");
+                            }
+
 
                             double fullPrice = 0.0;
                             if(!offerArray.getJSONObject(o).getJSONObject("offer").getJSONObject("price").isNull("value")){
@@ -330,7 +342,7 @@ public class InicioFragment extends Fragment {
                             }
 
                             String url = offerArray.getJSONObject(o).getJSONObject("offer").getJSONObject("thumbnail").optString("url");
-                            ThumbNail thumbNail = new ThumbNail(0,0,url);
+                            Thumbnail thumbNail = new Thumbnail(0,0,url);
                             Offer tempOffer = new Offer(productSeller,productId,fullPrice,amountOfParcels,parcelValue,offerName,thumbNail);
                             tempProduct.setOffer(tempOffer);
                         }
@@ -339,9 +351,6 @@ public class InicioFragment extends Fragment {
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
-
-                /*END - SAMUEL*/
-
             } else {
                 Log.e("ServiceHandler", "Não foi possível recuperar os dados da URL.");
             }

@@ -12,8 +12,8 @@ public class Offer implements Serializable {
     private int amountOfParcels;
     private double parcelValue;
     private String offerName;
-    private ThumbNail productThumbnail;
-    public Offer(Seller seller, int productId, double fullPrice, int amountOfParcels, double parcelValue, String offerName, ThumbNail productThumbnail) {
+    private Thumbnail productThumbnail;
+    public Offer(Seller seller, int productId, double fullPrice, int amountOfParcels, double parcelValue, String offerName, Thumbnail productThumbnail) {
         this.seller = seller;
         this.productId = productId;
         this.fullPrice = fullPrice;
@@ -48,11 +48,11 @@ public class Offer implements Serializable {
         return offerName;
     }
 
-    public ThumbNail getProductThumbnail() {
+    public Thumbnail getProductThumbnail() {
         return productThumbnail;
     }
 
-    public void setProductThumbnail(ThumbNail productThumbnail) {
+    public void setProductThumbnail(Thumbnail productThumbnail) {
         this.productThumbnail = productThumbnail;
     }
 }
